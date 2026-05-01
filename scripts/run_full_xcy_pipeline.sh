@@ -30,7 +30,7 @@ mkdir -p logs results/concept_prediction results/label_prediction
 
 # Set paths and CUDA environment
 export CUDA_VISIBLE_DEVICES=0
-export DATA_PATH="/project/def-arashmoh/shahab33/Medsam/selff-ref/data"
+export DATA_PATH="/home/gkianfar/scratch/Amin/maincode/Self-2-step-concept-based-skin-diagnosis/data"
 export PYTORCH_ALLOC_CONF=expandable_segments:True  # Better memory management (new name)
 
 # Check GPU
