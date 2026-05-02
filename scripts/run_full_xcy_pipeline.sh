@@ -3,11 +3,13 @@
 #SBATCH --account=def-arashmoh
 #SBATCH --time=12:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:h100:1              # Request H100 80GB GPU
-#SBATCH --cpus-per-task=8              # Increased for faster processing
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
-#SBATCH --output=logs/xcy_pipeline_%j.out
-#SBATCH --error=logs/xcy_pipeline_%j.err
+#SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
+#SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
+
+set -e  # stop on error
 
 echo "========================================="
 echo "🚀 FULL x→c→y PIPELINE WITH SELF-REFINE"
@@ -15,67 +17,78 @@ echo "Job ID: ${SLURM_JOB_ID}"
 echo "Started: $(date)"
 echo "========================================="
 
-# Load modules
-module load gcc python/3.11 cuda/12.6 opencv scipy-stack
+# ==============================
+# LOAD MODULES
+# ==============================
+module load gcc python/3.11 cuda/12.6
 
-# Activate environment
-source /project/def-arashmoh/shahab33/Medsam/self/bin/activate
-echo "✓ Environment activated: $VIRTUAL_ENV"
+# ==============================
+# ACTIVATE ENV
+# ==============================
+source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
+echo "✓ Environment: $VIRTUAL_ENV"
 
-# Go to project directory
-cd /project/def-arashmoh/shahab33/Medsam/selff-ref || exit 1
+# ==============================
+# PATHS
+# ==============================
+PROJECT_PATH="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis"
+DATA_PATH="$PROJECT_PATH/data"
+OUTPUT_BASE="/home/gkianfar/scratch/Amin/concept/outputs"
 
-# Create directories
-mkdir -p logs results/concept_prediction results/label_prediction
+cd $PROJECT_PATH || exit 1
 
-# Set paths and CUDA environment
-export CUDA_VISIBLE_DEVICES=0
-export DATA_PATH="/home/gkianfar/scratch/Amin/maincode/Self-2-step-concept-based-skin-diagnosis/data"
-export PYTORCH_ALLOC_CONF=expandable_segments:True  # Better memory management (new name)
+# ==============================
+# OUTPUT STRUCTURE
+# ==============================
+mkdir -p $OUTPUT_BASE/logs
+mkdir -p $OUTPUT_BASE/results/concept_prediction
+mkdir -p $OUTPUT_BASE/results/label_prediction
 
-# Check GPU
+# Redirect results folder
+[ -d results ] && rm -rf results
+ln -s $OUTPUT_BASE/results results
+
+echo "📁 DATA PATH: $DATA_PATH"
+echo "📁 OUTPUT PATH: $OUTPUT_BASE"
+
+# ==============================
+# DEBUG DATA STRUCTURE
+# ==============================
+echo "🔎 Checking datasets..."
+ls $DATA_PATH
+ls $DATA_PATH/PH2
+ls $DATA_PATH/Derm7pt
+ls $DATA_PATH/HAM10000
+
+# ==============================
+# GPU INFO
+# ==============================
 echo ""
-echo "🔍 GPU Information:"
+echo "🔍 GPU Info:"
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
-echo ""
-echo "📊 Processing all datasets with self-refine..."
-echo ""
+export CUDA_VISIBLE_DEVICES=$SLURM_GPUS
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # ============================================
-# DATASET 1: PH2 (5 splits)
+# PH2 (5 splits)
 # ============================================
-echo "========================================="
-echo "[1/3] PH2 Dataset - 5 Splits"
-echo "========================================="
+echo "========== PH2 =========="
 
 for split in 0 1 2 3 4; do
-    echo ""
-    echo "--- PH2 Split $split ---"
-    
-    # Step 1: x→c (generate refined concepts)
-    echo "  [x→c] Generating refined concepts..."
+    echo "---- PH2 Split $split ----"
+
     python run_x_to_c_to_y.py \
         --dataset PH2 \
         --split $split \
         --generate_concepts \
         --data_path $DATA_PATH \
-        2>&1 | tee -a logs/ph2_split_${split}_xc.log
-    
-    # Check if concept generation succeeded
-    if [ $? -ne 0 ]; then
-        echo "  ❌ ERROR: Concept generation failed for PH2 split $split"
-        continue
-    fi
-    
-    # Clear GPU memory between steps
-    echo "  🧹 Clearing GPU memory..."
-    python -c "import torch; torch.cuda.empty_cache(); import gc; gc.collect()"
+        2>&1 | tee $OUTPUT_BASE/logs/ph2_${split}_xc.log
+
+    python -c "import torch; torch.cuda.empty_cache()"
     sleep 2
-    
-    # Step 2: c→y (concepts to diagnosis)
-    echo "  [c→y] Predicting diagnosis..."
+
     python run_x_to_c_to_y.py \
         --dataset PH2 \
         --split $split \
@@ -83,124 +96,64 @@ for split in 0 1 2 3 4; do
         --ckpt Henrychur/MMed-Llama-3-8B \
         --n_demos 0 \
         --data_path $DATA_PATH \
-        2>&1 | tee -a logs/ph2_split_${split}_cy.log
-    
-    if [ $? -ne 0 ]; then
-        echo "  ❌ ERROR: Diagnosis prediction failed for PH2 split $split"
-        continue
-    fi
-    
-    # Clear GPU memory after each split
-    echo "  🧹 Clearing GPU memory..."
-    python -c "import torch; torch.cuda.empty_cache(); import gc; gc.collect()"
-    
-    echo "  ✓ Split $split completed at $(date)"
-    echo ""
+        2>&1 | tee $OUTPUT_BASE/logs/ph2_${split}_cy.log
+
+    python -c "import torch; torch.cuda.empty_cache()"
+    echo "✓ PH2 split $split done"
 done
 
-echo ""
-echo "✓ PH2 completed!"
-echo ""
-
 # ============================================
-# DATASET 2: Derm7pt
+# Derm7pt
 # ============================================
-echo "========================================="
-echo "[2/3] Derm7pt Dataset"
-echo "========================================="
+echo "========== Derm7pt =========="
 
-# Step 1: x→c
-echo "  [x→c] Generating refined concepts..."
 python run_x_to_c_to_y.py \
     --dataset Derm7pt \
     --generate_concepts \
     --data_path $DATA_PATH \
-    2>&1 | tee logs/derm7pt_xc.log
+    2>&1 | tee $OUTPUT_BASE/logs/derm7_xc.log
 
-if [ $? -eq 0 ]; then
-    # Clear GPU memory
-    echo "  🧹 Clearing GPU memory..."
-    python -c "import torch; torch.cuda.empty_cache(); import gc; gc.collect()"
-    sleep 2
-    
-    # Step 2: c→y
-    echo "  [c→y] Predicting diagnosis..."
-    python run_x_to_c_to_y.py \
-        --dataset Derm7pt \
-        --llm MMed \
-        --ckpt Henrychur/MMed-Llama-3-8B \
-        --n_demos 0 \
-        --data_path $DATA_PATH \
-        2>&1 | tee logs/derm7pt_cy.log
-    
-    echo ""
-    echo "✓ Derm7pt completed!"
-else
-    echo "  ❌ ERROR: Concept generation failed for Derm7pt"
-fi
+python -c "import torch; torch.cuda.empty_cache()"
+sleep 2
 
-# Clear GPU memory
-python -c "import torch; torch.cuda.empty_cache(); import gc; gc.collect()"
-echo ""
+python run_x_to_c_to_y.py \
+    --dataset Derm7pt \
+    --llm MMed \
+    --ckpt Henrychur/MMed-Llama-3-8B \
+    --n_demos 0 \
+    --data_path $DATA_PATH \
+    2>&1 | tee $OUTPUT_BASE/logs/derm7_cy.log
 
 # ============================================
-# DATASET 3: HAM10000
+# HAM10000
 # ============================================
-echo "========================================="
-echo "[3/3] HAM10000 Dataset"
-echo "========================================="
+echo "========== HAM10000 =========="
 
-# Step 1: x→c
-echo "  [x→c] Generating refined concepts..."
 python run_x_to_c_to_y.py \
     --dataset HAM10000 \
     --generate_concepts \
     --data_path $DATA_PATH \
-    2>&1 | tee logs/ham10000_xc.log
+    2>&1 | tee $OUTPUT_BASE/logs/ham_xc.log
 
-if [ $? -eq 0 ]; then
-    # Clear GPU memory
-    echo "  🧹 Clearing GPU memory..."
-    python -c "import torch; torch.cuda.empty_cache(); import gc; gc.collect()"
-    sleep 2
-    
-    # Step 2: c→y
-    echo "  [c→y] Predicting diagnosis..."
-    python run_x_to_c_to_y.py \
-        --dataset HAM10000 \
-        --llm MMed \
-        --ckpt Henrychur/MMed-Llama-3-8B \
-        --n_demos 0 \
-        --data_path $DATA_PATH \
-        2>&1 | tee logs/ham10000_cy.log
-    
-    echo ""
-    echo "✓ HAM10000 completed!"
-else
-    echo "  ❌ ERROR: Concept generation failed for HAM10000"
-fi
+python -c "import torch; torch.cuda.empty_cache()"
+sleep 2
 
-echo ""
+python run_x_to_c_to_y.py \
+    --dataset HAM10000 \
+    --llm MMed \
+    --ckpt Henrychur/MMed-Llama-3-8B \
+    --n_demos 0 \
+    --data_path $DATA_PATH \
+    2>&1 | tee $OUTPUT_BASE/logs/ham_cy.log
 
 # ============================================
-# SUMMARY
+# DONE
 # ============================================
 echo "========================================="
-echo "✅ COMPLETE PIPELINE FINISHED"
+echo "✅ PIPELINE FINISHED"
+echo "Finished: $(date)"
 echo "========================================="
-echo "Completed: $(date)"
+
 echo ""
-echo "📁 Results saved in:"
-echo "  Concepts: results/concept_prediction/"
-echo "  Diagnosis: results/label_prediction/"
-echo ""
-echo "📊 To view results:"
-echo "  cd results/label_prediction"
-echo "  ls -lh"
-echo ""
-echo "📊 Result files:"
-ls -lh results/label_prediction/ 2>/dev/null || echo "  (No files yet)"
-echo ""
-echo "📈 Next: Calculate metrics with:"
-echo "  python calculate_metrics.py --model=MMed --task=PH2_eval ..."
-echo "========================================="
+echo "📁 All outputs saved in:"
+echo "$OUTPUT_BASE"
