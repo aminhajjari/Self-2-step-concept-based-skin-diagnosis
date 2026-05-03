@@ -109,9 +109,10 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         from src.utils import create_explicd_config
         config = create_explicd_config(gpu_id=2)    # TODO: Make this dynamically
         model = Explicd(config=config)
-        mmed_refiner = MMedBasedRefiner(
-            ckpt='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B'
-            )
+        print("\n[INFO] Loading MMed refiner for self-refine...")
+        mmed_refiner = MMedBasedRefiner(ckpt=MMED_CKPT_PATH)
+        print("[INFO] MMed refiner ready!")
+            
     else:
         raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
       
@@ -146,12 +147,12 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         #elif model_name == "Explicd":
             #predicted_concepts, _ = model.get_concept_predictions(batch=batch, config=config) 
          elif model_name == "Explicd":
-                predicted_concepts, _, refinement_info = model.get_concept_predictions_with_self_refine(
-                    batch=batch,
-                    config=config,
-                    use_self_refine=True,
-                    llm_refiner=mmed_refiner
-                )
+             predicted_concepts, _, refinement_info = model.get_concept_predictions_with_self_refine(
+                 batch=batch,
+                 config=config,
+                 use_self_refine=True,
+                 llm_refiner=mmed_refiner
+            )
 
 
         if not raw_values:
@@ -229,10 +230,10 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
                 #predicted_concepts, _ = model.get_concept_predictions(batch=batch, config=config) 
              elif model_name == "Explicd":
                  predicted_concepts, _, refinement_info = model.get_concept_predictions_with_self_refine(   
-                    batch=batch,
-                    config=config,
-                    use_self_refine=True,
-                    llm_refiner=mmed_refiner
+                     batch=batch,
+                     config=config,
+                     use_self_refine=True,
+                     llm_refiner=mmed_refiner
                 )
 
             if not raw_values:
