@@ -44,7 +44,9 @@ class Explicd:
         
         # We find using orig_in21k vit weights works better than biomedclip vit weights
         # Delete the following if want to use biomedclip weights
-        vit = timm.create_model('vit_base_patch16_224.orig_in21k', pretrained=True, num_classes=config.num_class)
+        #vit = timm.create_model('vit_base_patch16_224.orig_in21k', pretrained=True, num_classes=config.num_class)
+        vit = timm.create_model('vit_base_patch16_224.orig_in21k', pretrained=False, num_classes=config.num_class)
+        vit.load_state_dict(torch.load('/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/ViT/vit_base_patch16_224_orig_in21k.pth'))
         vit.head = nn.Identity()
         self.model.model.visual.trunk.load_state_dict(vit.state_dict())
 
