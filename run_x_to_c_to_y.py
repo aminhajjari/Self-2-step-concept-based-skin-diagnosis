@@ -23,6 +23,8 @@ from mmed_refiner import MMedBasedRefiner
 # ==============================
 MMED_CKPT_PATH = '/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B'
 
+
+
 clinical_concepts = [
             'typical pigment network',
             'atypical pigment network',
@@ -97,7 +99,7 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
 
     # Load data
     train_dataloader, test_dataloader = load_data(dataset=dataset, split=split)
-
+            
     # Initialize model
     if model_name == "MONET":
         model = MONET()
@@ -105,6 +107,8 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         model = CLIPViTB16()
     elif model_name == "BiomedCLIP":
         model = BiomedCLIP()
+    config = None
+    mmed_refiner = None
     elif model_name == "Explicd":
         from src.utils import create_explicd_config
         config = create_explicd_config(gpu_id=2)    # TODO: Make this dynamically
