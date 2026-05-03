@@ -16,6 +16,12 @@ from src.models.Mistral import Mistral
 from src.models.GPT4o import GPT4o
 from src.utils import map_label_to_name, load_data, generate_template, convert_numbers_to_concepts, map_letter_to_label, calculate_metrics, save_data_to_json, seed_everything, get_current_date
 from src.rices import RICES
+from mmed_refiner import MMedBasedRefiner
+
+# ==============================
+# LOCAL CHECKPOINT PATH
+# ==============================
+MMED_CKPT_PATH = '/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B'
 
 clinical_concepts = [
             'typical pigment network',
@@ -103,9 +109,12 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         from src.utils import create_explicd_config
         config = create_explicd_config(gpu_id=2)    # TODO: Make this dynamically
         model = Explicd(config=config)
+        mmed_refiner = MMedBasedRefiner(
+            ckpt='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B'
+            )
     else:
         raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
-
+      
     # Get concept prompts
     if model_name == "MONET":
         prompt_info = {}
