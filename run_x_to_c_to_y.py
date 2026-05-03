@@ -111,7 +111,7 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
     
     elif model_name == "Explicd":
         from src.utils import create_explicd_config
-        config = create_explicd_config(gpu_id=2)    # TODO: Make this dynamically
+        config = create_explicd_config(gpu_id=0)    # TODO: Make this dynamically
         model = Explicd(config=config)
         print("\n[INFO] Loading MMed refiner for self-refine...")
         mmed_refiner = MMedBasedRefiner(ckpt=MMED_CKPT_PATH)
