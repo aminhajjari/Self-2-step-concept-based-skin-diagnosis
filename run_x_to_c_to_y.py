@@ -225,8 +225,15 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
                     text_input.extend([prompt_template.format(concept)])
                     text_input.extend([prompt_template.format(term) for term in concept_reference_dict[concept]])
                     scores.append(model.calculate_similarity(img_batch=imgs, text_batch=text_input))
-            elif model_name == "Explicd":
-                predicted_concepts, _ = model.get_concept_predictions(batch=batch, config=config) 
+            #elif model_name == "Explicd":
+                #predicted_concepts, _ = model.get_concept_predictions(batch=batch, config=config) 
+             elif model_name == "Explicd":
+                 predicted_concepts, _, refinement_info = model.get_concept_predictions_with_self_refine(   
+                    batch=batch,
+                    config=config,
+                    use_self_refine=True,
+                    llm_refiner=mmed_refiner
+                )
 
             if not raw_values:
                 if model_name == "MONET":
