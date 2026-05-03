@@ -7,10 +7,10 @@ import os
 import gc
 import torch
 
-from src.models.MONET import MONET 
-from src.models.CLIP import CLIPViTB16
-from src.models.BiomedCLIP import BiomedCLIP
-from src.models.MMed_Llama_3_8B import MMedLlama3
+#from src.models.MONET import MONET 
+#from src.models.CLIP import CLIPViTB16
+#from src.models.BiomedCLIP import BiomedCLIP
+#from src.models.MMed_Llama_3_8B import MMedLlama3
 from src.models.Explicd import Explicd
 from src.models.Mistral import Mistral
 from src.models.GPT4o import GPT4o
