@@ -9,18 +9,26 @@
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
 
-set -e  # stop on error
+set -e
 
 echo "========================================="
-echo "🚀 FULL x→c→y PIPELINE WITH SELF-REFINE"
+echo "FULL x→c→y PIPELINE WITH SELF-REFINE"
 echo "Job ID: ${SLURM_JOB_ID}"
 echo "Started: $(date)"
 echo "========================================="
 
 # ==============================
-# LOAD MODULES
+# LOAD MODULES — fixed python version
 # ==============================
-module load gcc python/3.11 cuda/12.6
+module load gcc python/3.10 cuda/12.6
+
+# ==============================
+# OFFLINE MODE — prevent any internet calls
+# ==============================
+export TRANSFORMERS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+export HF_HUB_OFFLINE=1
+export TIMM_FUSED_ATTN=0
 
 # ==============================
 # ACTIVATE ENV
@@ -34,6 +42,7 @@ echo "✓ Environment: $VIRTUAL_ENV"
 PROJECT_PATH="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis"
 DATA_PATH="$PROJECT_PATH/data"
 OUTPUT_BASE="/home/gkianfar/scratch/Amin/concept/outputs"
+CKPT_PATH="$PROJECT_PATH/checkpoint/MMed-Llama-3-8B"
 
 cd $PROJECT_PATH || exit 1
 
@@ -44,17 +53,17 @@ mkdir -p $OUTPUT_BASE/logs
 mkdir -p $OUTPUT_BASE/results/concept_prediction
 mkdir -p $OUTPUT_BASE/results/label_prediction
 
-# Redirect results folder
 [ -d results ] && rm -rf results
 ln -s $OUTPUT_BASE/results results
 
 echo "📁 DATA PATH: $DATA_PATH"
 echo "📁 OUTPUT PATH: $OUTPUT_BASE"
+echo "📁 CKPT PATH: $CKPT_PATH"
 
 # ==============================
 # DEBUG DATA STRUCTURE
 # ==============================
-echo "🔎 Checking datasets..."
+echo "Checking datasets..."
 ls $DATA_PATH
 ls $DATA_PATH/PH2
 ls $DATA_PATH/Derm7pt
@@ -64,7 +73,7 @@ ls $DATA_PATH/HAM10000
 # GPU INFO
 # ==============================
 echo ""
-echo "🔍 GPU Info:"
+echo "GPU Info:"
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
@@ -93,7 +102,7 @@ for split in 0 1 2 3 4; do
         --dataset PH2 \
         --split $split \
         --llm MMed \
-        --ckpt Henrychur/MMed-Llama-3-8B \
+        --ckpt $CKPT_PATH \
         --n_demos 0 \
         --data_path $DATA_PATH \
         2>&1 | tee $OUTPUT_BASE/logs/ph2_${split}_cy.log
@@ -119,7 +128,7 @@ sleep 2
 python run_x_to_c_to_y.py \
     --dataset Derm7pt \
     --llm MMed \
-    --ckpt Henrychur/MMed-Llama-3-8B \
+    --ckpt $CKPT_PATH \
     --n_demos 0 \
     --data_path $DATA_PATH \
     2>&1 | tee $OUTPUT_BASE/logs/derm7_cy.log
@@ -141,7 +150,7 @@ sleep 2
 python run_x_to_c_to_y.py \
     --dataset HAM10000 \
     --llm MMed \
-    --ckpt Henrychur/MMed-Llama-3-8B \
+    --ckpt $CKPT_PATH \
     --n_demos 0 \
     --data_path $DATA_PATH \
     2>&1 | tee $OUTPUT_BASE/logs/ham_cy.log
@@ -155,5 +164,4 @@ echo "Finished: $(date)"
 echo "========================================="
 
 echo ""
-echo "📁 All outputs saved in:"
-echo "$OUTPUT_BASE"
+echo "All outputs saved in: $OUTPUT_BASE"
