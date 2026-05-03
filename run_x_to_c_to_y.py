@@ -136,7 +136,8 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
 
         if model_name != "Explicd":
             image_embedding = model.extract_image_features(imgs)
-            image_features_norm = image_embedding / image_embedding.norm(dim=1, keepdim=True)
+            #image_features_norm = image_embedding / image_embedding.norm(dim=1, keepdim=True)
+            image_features_norm = image_embedding / (image_embedding.norm(dim=1, keepdim=True) + 1e-8)
 
         if model_name == "MONET":
             scores = model.get_concept_bottleneck(image_features_norm=image_features_norm, concept_list=concept_reference_dict.keys() , prompt_info=prompt_info, concept_reference_dict=concept_reference_dict)
