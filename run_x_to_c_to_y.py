@@ -524,6 +524,14 @@ if __name__ == "__main__":
 
     # Uncomment line below to generate the concepts from input images, otherwise, use the provided concepts at 'data/concept_prediction'
     # x_to_c(model_name=args.model, dataset=args.dataset, concept_reference_dict=args.concept_reference_dict, split=args.split, raw_values=args.raw_values, predict_for_train_set=args.predict_for_train_set)
+
+    if args.generate_concepts:
+                
+        x_to_c(model_name=args.model, dataset=args.dataset,
+                concept_reference_dict=args.concept_reference_dict,
+                split=args.split, raw_values=args.raw_values,
+                predict_for_train_set=args.predict_for_train_set) 
+            
     c_to_y(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, raw_values=args.raw_values, concept_extractor=args.concept_extractor, report_path=args.report_path, use_demos=args.use_demos, n_demos=args.n_demos, ground_truth_concepts=args.gt_concepts)
     classification(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, ground_truth_concepts=args.gt_concepts,  raw_values=args.raw_values, concept_extractor=args.concept_extractor, n_demos=args.n_demos)
 
