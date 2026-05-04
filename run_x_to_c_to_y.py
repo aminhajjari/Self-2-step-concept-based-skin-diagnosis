@@ -507,6 +507,8 @@ if __name__ == "__main__":
     parser.add_argument('--predict_for_train_set', action="store_true", help='Add this argument if you want to generate reports also for training set.')
     parser.add_argument('--n_demos', type=int, help='Number of demos. Valid when --use_demos is added to the config.', default=0)
     parser.add_argument('--gt_concepts', action="store_true", help='Whether or not use gt concepts in the setting c -> y')
+    parser.add_argument('--generate_concepts', action="store_true", help='Run the x->c concept generation step')
+    parser.add_argument('--data_path', type=str, default='data', help='Root path to data directory')
     args = parser.parse_args()
 
     seed_everything(seed=42)
