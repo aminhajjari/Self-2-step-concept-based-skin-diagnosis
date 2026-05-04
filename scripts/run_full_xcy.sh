@@ -1,5 +1,5 @@
-
 #!/bin/bash
+
 #SBATCH --job-name=xcy_selfrefine
 #SBATCH --account=def-arashmoh
 #SBATCH --time=12:00:00
