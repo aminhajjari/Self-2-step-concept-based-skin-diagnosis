@@ -138,7 +138,7 @@ def save_dict_to_csv(dataset, model, dict_responses, task, split=None):
 
     print(f"Results saved to {file_path}")
 
-def load_data(dataset:str, split:int):
+def load_data(dataset: str, split: int, data_path: str = 'data'):
 
     if dataset == "PH2":
         dataset_train = PH2Dataset(csv_file=f"data/PH2/splits/PH2_train_split_{split}.csv", img_extension="jpg", path_to_images="data/PH2/images")
