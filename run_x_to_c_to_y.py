@@ -74,7 +74,7 @@ concept_reference_dict_HAM10000 = {
 }
 
 
-def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: int=None, raw_values: bool=False, predict_for_train_set: bool=False) -> None:
+def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: int=None, raw_values: bool=False, predict_for_train_set: bool=False, data_path: str='data') -> None::
     """Predicts concepts from MONET.
 
     Args:
@@ -98,7 +98,7 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         concept_reference_dict = concept_reference_dict_MONET
 
     # Load data
-    train_dataloader, test_dataloader = load_data(dataset=dataset, split=split, data_path=args.data_path)
+    train_dataloader, test_dataloader = load_data(dataset=dataset, split=split, data_path=data_path)
     config = None
     mmed_refiner = None       
     # Initialize model
