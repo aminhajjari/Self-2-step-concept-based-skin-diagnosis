@@ -18,23 +18,35 @@ echo "Started: $(date)"
 echo "========================================="
 
 # ==============================
-# LOAD MODULES — fixed python version
+# LOAD MODULES (CRITICAL ORDER)
 # ==============================
-module load gcc python/3.10 cuda/12.6
+module purge
+module load gcc python/3.10 cuda/12.6 opencv/4.10.0
+
+echo "✓ Modules loaded"
 
 # ==============================
-# OFFLINE MODE — prevent any internet calls
+# ACTIVATE ENV (AFTER MODULES)
+# ==============================
+source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
+echo "✓ Environment: $VIRTUAL_ENV"
+
+# ==============================
+# VERIFY OPENCV (DEBUG - KEEP THIS)
+# ==============================
+python - <<EOF
+import cv2
+print("✓ OpenCV version:", cv2.__version__)
+print("✓ OpenCV path:", cv2.__file__)
+EOF
+
+# ==============================
+# OFFLINE MODE
 # ==============================
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
 export HF_HUB_OFFLINE=1
 export TIMM_FUSED_ATTN=0
-
-# ==============================
-# ACTIVATE ENV
-# ==============================
-source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
-echo "✓ Environment: $VIRTUAL_ENV"
 
 # ==============================
 # PATHS
@@ -56,29 +68,24 @@ mkdir -p $OUTPUT_BASE/results/label_prediction
 [ -d results ] && rm -rf results
 ln -s $OUTPUT_BASE/results results
 
-echo "📁 DATA PATH: $DATA_PATH"
-echo "📁 OUTPUT PATH: $OUTPUT_BASE"
-echo "📁 CKPT PATH: $CKPT_PATH"
-
-# ==============================
-# DEBUG DATA STRUCTURE
-# ==============================
-echo "Checking datasets..."
-ls $DATA_PATH
-ls $DATA_PATH/PH2
-ls $DATA_PATH/Derm7pt
-ls $DATA_PATH/HAM10000
-
 # ==============================
 # GPU INFO
 # ==============================
 echo ""
-echo "GPU Info:"
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
-export CUDA_VISIBLE_DEVICES=$SLURM_GPUS
+export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# ==============================
+# RUN FUNCTION (avoid repetition)
+# ==============================
+run_stage () {
+    python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE"
+    python -c "import torch; torch.cuda.empty_cache()"
+    sleep 2
+}
 
 # ============================================
 # PH2 (5 splits)
@@ -88,26 +95,12 @@ echo "========== PH2 =========="
 for split in 0 1 2 3 4; do
     echo "---- PH2 Split $split ----"
 
-    python run_x_to_c_to_y.py \
-        --dataset PH2 \
-        --split $split \
-        --generate_concepts \
-        --data_path $DATA_PATH \
-        2>&1 | tee $OUTPUT_BASE/logs/ph2_${split}_xc.log
+    LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
+    run_stage --dataset PH2 --split $split --generate_concepts --data_path $DATA_PATH
 
-    python -c "import torch; torch.cuda.empty_cache()"
-    sleep 2
+    LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_cy.log
+    run_stage --dataset PH2 --split $split --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
 
-    python run_x_to_c_to_y.py \
-        --dataset PH2 \
-        --split $split \
-        --llm MMed \
-        --ckpt $CKPT_PATH \
-        --n_demos 0 \
-        --data_path $DATA_PATH \
-        2>&1 | tee $OUTPUT_BASE/logs/ph2_${split}_cy.log
-
-    python -c "import torch; torch.cuda.empty_cache()"
     echo "✓ PH2 split $split done"
 done
 
@@ -116,44 +109,22 @@ done
 # ============================================
 echo "========== Derm7pt =========="
 
-python run_x_to_c_to_y.py \
-    --dataset Derm7pt \
-    --generate_concepts \
-    --data_path $DATA_PATH \
-    2>&1 | tee $OUTPUT_BASE/logs/derm7_xc.log
+LOG_FILE=$OUTPUT_BASE/logs/derm7_xc.log
+run_stage --dataset Derm7pt --generate_concepts --data_path $DATA_PATH
 
-python -c "import torch; torch.cuda.empty_cache()"
-sleep 2
-
-python run_x_to_c_to_y.py \
-    --dataset Derm7pt \
-    --llm MMed \
-    --ckpt $CKPT_PATH \
-    --n_demos 0 \
-    --data_path $DATA_PATH \
-    2>&1 | tee $OUTPUT_BASE/logs/derm7_cy.log
+LOG_FILE=$OUTPUT_BASE/logs/derm7_cy.log
+run_stage --dataset Derm7pt --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
 
 # ============================================
 # HAM10000
 # ============================================
 echo "========== HAM10000 =========="
 
-python run_x_to_c_to_y.py \
-    --dataset HAM10000 \
-    --generate_concepts \
-    --data_path $DATA_PATH \
-    2>&1 | tee $OUTPUT_BASE/logs/ham_xc.log
+LOG_FILE=$OUTPUT_BASE/logs/ham_xc.log
+run_stage --dataset HAM10000 --generate_concepts --data_path $DATA_PATH
 
-python -c "import torch; torch.cuda.empty_cache()"
-sleep 2
-
-python run_x_to_c_to_y.py \
-    --dataset HAM10000 \
-    --llm MMed \
-    --ckpt $CKPT_PATH \
-    --n_demos 0 \
-    --data_path $DATA_PATH \
-    2>&1 | tee $OUTPUT_BASE/logs/ham_cy.log
+LOG_FILE=$OUTPUT_BASE/logs/ham_cy.log
+run_stage --dataset HAM10000 --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
 
 # ============================================
 # DONE
@@ -163,5 +134,4 @@ echo "✅ PIPELINE FINISHED"
 echo "Finished: $(date)"
 echo "========================================="
 
-echo ""
 echo "All outputs saved in: $OUTPUT_BASE"
