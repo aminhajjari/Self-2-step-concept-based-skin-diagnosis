@@ -11,7 +11,7 @@ from datetime import datetime
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix, classification_report, roc_curve, auc, roc_auc_score
 from src.data.PH2_dataset import PH2Dataset
 from src.data.HAM10000_dataset import HAM10000Dataset
-
+from open_clip import create_model_from_pretrained
 
 def seed_everything(seed=0):
     """Sets random sets for torch operations.
@@ -172,6 +172,8 @@ def convert_numbers_to_concepts(concepts: list, concept_reference_dict):
         return [name for name, concept in zip(list(concept_reference_dict.keys()), concepts) if concept == 1]
 
 def create_explicd_config(gpu_id):
+    
+    
 
     class Values:
         def __init__(self, **kwargs):
@@ -200,5 +202,6 @@ def create_explicd_config(gpu_id):
     
     config.cls_weight = cls_weight_dict[config.dataset]
     config.num_class = num_class_dict[config.dataset]
+    _, config.preprocess = create_model_from_pretrained('hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224')
 
     return config
