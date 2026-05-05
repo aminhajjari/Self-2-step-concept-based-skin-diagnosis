@@ -12,7 +12,6 @@
 
 set -e
 
-
 echo "========================================="
 echo "FULL x→c→y PIPELINE WITH SELF-REFINE"
 echo "Job ID: ${SLURM_JOB_ID}"
@@ -98,10 +97,18 @@ for split in 0 1 2 3 4; do
     echo "---- PH2 Split $split ----"
 
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
-    run_stage --dataset PH2 --split $split --generate_concepts --data_path $DATA_PATH
+    run_stage --dataset PH2 --split $split \
+              --model Explicd \
+              --concept_extractor Explicd \
+              --generate_concepts \
+              --data_path $DATA_PATH
 
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_cy.log
-    run_stage --dataset PH2 --split $split --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
+    run_stage --dataset PH2 --split $split \
+              --model Explicd \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
+              --data_path $DATA_PATH
 
     echo "✓ PH2 split $split done"
 done
@@ -112,10 +119,18 @@ done
 echo "========== Derm7pt =========="
 
 LOG_FILE=$OUTPUT_BASE/logs/derm7_xc.log
-run_stage --dataset Derm7pt --generate_concepts --data_path $DATA_PATH
+run_stage --dataset Derm7pt \
+          --model Explicd \
+          --concept_extractor Explicd \
+          --generate_concepts \
+          --data_path $DATA_PATH
 
 LOG_FILE=$OUTPUT_BASE/logs/derm7_cy.log
-run_stage --dataset Derm7pt --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
+run_stage --dataset Derm7pt \
+          --model Explicd \
+          --concept_extractor Explicd \
+          --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
+          --data_path $DATA_PATH
 
 # ============================================
 # HAM10000
@@ -123,10 +138,18 @@ run_stage --dataset Derm7pt --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path
 echo "========== HAM10000 =========="
 
 LOG_FILE=$OUTPUT_BASE/logs/ham_xc.log
-run_stage --dataset HAM10000 --generate_concepts --data_path $DATA_PATH
+run_stage --dataset HAM10000 \
+          --model Explicd \
+          --concept_extractor Explicd \
+          --generate_concepts \
+          --data_path $DATA_PATH
 
 LOG_FILE=$OUTPUT_BASE/logs/ham_cy.log
-run_stage --dataset HAM10000 --llm MMed --ckpt $CKPT_PATH --n_demos 0 --data_path $DATA_PATH
+run_stage --dataset HAM10000 \
+          --model Explicd \
+          --concept_extractor Explicd \
+          --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
+          --data_path $DATA_PATH
 
 # ============================================
 # DONE
