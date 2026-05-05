@@ -494,13 +494,14 @@ def classification(model_name:str, dataset: str, ckpt: str, split=None, ground_t
    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Concept to Class label Classification')
-    parser.add_argument('--model', type=str, help='Name of the model to evaluate. Choose between (MONET, CLIP, BiomedCLIP, Explicd).', default='CLIP')
+    parser.add_argument('--model', type=str, help='Name of the model to evaluate. Choose between (MONET, CLIP, BiomedCLIP, Explicd).', default='Explicd')  # was 'CLIP'
     parser.add_argument('--dataset', type=str, help='Dataset to evaluate', default='Derm7pt')
     parser.add_argument('--report_path', type=str, help='Path to report', default=None)
     parser.add_argument('--split', type=int, help='Split of the dataset if exists', default=None)
     parser.add_argument('--raw_values', action="store_true", help='Include this parameter to save concepts along its concept presence score.')
-    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='Henrychur/MMed-Llama-3-8B')
-    parser.add_argument('--concept_extractor', type=str, help='Name of the model used to extract the concepts', default='MONET')
+    #parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='Henrychur/MMed-Llama-3-8B')
+    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B')  # was 'Henrychur/MMed-Llama-3-8B'
+    parser.add_argument('--concept_extractor', type=str, help='Name of the model used to extract the concepts', default='Explicd')  # was 'MONET'
     parser.add_argument('--concept_reference_dict', type=str, help='Name of the model used to extract the concepts', default='PH2')
     parser.add_argument('--llm', type=str, help='Name of the LLM used to provide the final diagnosis. Choose between (MMed, Mistral)', default='MMed')
     parser.add_argument('--use_demos', action="store_true", help='Add this argument if few-shot learning')
