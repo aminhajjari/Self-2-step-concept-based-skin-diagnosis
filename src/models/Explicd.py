@@ -86,7 +86,49 @@ class Explicd:
             dict_data[img_id] = template.format(*concept_preds)
         
         return dict_data[img_id], raw_scores
+
     
+    def get_concept_predictions_with_self_refine(self, batch, config, use_self_refine=True, llm_refiner=None):
+        """
+        Step 1: Explicd extracts initial concepts from image (VLM job)
+        Step 2: MMed refines concepts for clinical consistency (LLM job)
+        
+        Args:
+            batch: Input batch with image data
+            config: Explicd config object
+            use_self_refine: Whether to apply self-refinement
+            llm_refiner: MMedBasedRefiner instance (does the actual refinement)
+        
+        Returns:
+            concepts_str: Final (possibly refined) concept string
+            raw_scores: Raw concept scores from Explicd
+            refinement_info: Dict with refinement statistics
+        """
+        from src.self_refiner.concept_refiner import ConceptSelfRefine
+
+        # Step 1: Explicd extracts initial concepts from image (VLM job)
+        concepts_str, raw_scores = self.get_concept_predictions(batch, config)
+        
+        print(f"\n[Explicd] Initial concepts: {concepts_str}")
+
+        refinement_info = {
+            'iterations': 0, 
+            'converged': False, 
+            'initial_violations': 0,
+            'final_violations': 0
+        }
+
+        # Step 2: MMed refines the concepts for consistency (LLM job)
+        if use_self_refine and llm_refiner is not None:
+            print(f"[MMed] Starting self-refinement...")
+            refiner = ConceptSelfRefine(llm_refine_fn=llm_refiner)
+            concepts_str, refinement_info = refiner.refine(concepts_str)
+            print(f"[MMed] Refinement done: {refinement_info}")
+        else:
+            print(f"[INFO] Self-refine skipped (use_self_refine={use_self_refine}, llm_refiner={llm_refiner is not None})")
+
+        return concepts_str, raw_scores, refinement_info
+        
     def get_concept_predictions_for_a_single_image(self, pil_image):
         template = """The color is {}, the shape is {}, the border is {}, the dermoscopic patterns are {}, the texture is {}, the symmetry is {}, the elevation is {}."""
 
