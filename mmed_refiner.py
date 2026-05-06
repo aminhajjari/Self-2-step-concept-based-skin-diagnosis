@@ -79,7 +79,7 @@ class MMedBasedRefiner:
                 else:
                     # Fall back to rule-based refinement
                     print(f"⚠ Extraction failed, using rule-based fallback")
-                    from src.self_refine.concept_refiner import SimpleRuleBasedRefiner
+                    from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
                     fallback = SimpleRuleBasedRefiner()
                     return fallback(concepts_str, feedback, concepts_dict)
             
