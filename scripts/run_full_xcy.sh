@@ -10,8 +10,6 @@
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
 
-set -e
-
 echo "========================================="
 echo "FULL x→c→y PIPELINE WITH SELF-REFINE"
 echo "Job ID: ${SLURM_JOB_ID}"
@@ -19,35 +17,36 @@ echo "Started: $(date)"
 echo "========================================="
 
 # ==============================
-# LOAD MODULES (CRITICAL ORDER)
+# LOAD MODULES
 # ==============================
 module purge
 module load gcc python/3.10 cuda/12.6 opencv/4.10.0
-
 echo "✓ Modules loaded"
 
 # ==============================
-# ACTIVATE ENV (AFTER MODULES)
+# ACTIVATE ENV
 # ==============================
 source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
 echo "✓ Environment: $VIRTUAL_ENV"
 
 # ==============================
-# VERIFY OPENCV (DEBUG - KEEP THIS)
+# VERIFY OPENCV
 # ==============================
 python - <<EOF
 import cv2
 print("✓ OpenCV version:", cv2.__version__)
-print("✓ OpenCV path:", cv2.__file__)
 EOF
 
 # ==============================
-# OFFLINE MODE
+# ENVIRONMENT VARIABLES
 # ==============================
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
-export HF_HUB_OFFLINE=1
+unset HF_HUB_OFFLINE                  # allow HF hub for BiomedCLIP cache
 export TIMM_FUSED_ATTN=0
+export CUDA_VISIBLE_DEVICES=0
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export HF_HUB_CACHE=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedCLIP
 
 # ==============================
 # PATHS
@@ -72,19 +71,14 @@ ln -s $OUTPUT_BASE/results results
 # ==============================
 # GPU INFO
 # ==============================
-echo ""
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
-export CUDA_VISIBLE_DEVICES=0
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-export HF_HUB_CACHE=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedCLIP
-unset HF_HUB_OFFLINE
 # ==============================
-# RUN FUNCTION (avoid repetition)
+# RUN FUNCTION
 # ==============================
 run_stage () {
-    python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE"
+    python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE" || echo "⚠ Stage failed, continuing..."
     python -c "import torch; torch.cuda.empty_cache()"
     sleep 2
 }
@@ -97,6 +91,7 @@ echo "========== PH2 =========="
 for split in 0 1 2 3 4; do
     echo "---- PH2 Split $split ----"
 
+    # x→c: generate concepts
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
     run_stage --dataset PH2 --split $split \
               --model Explicd \
@@ -104,9 +99,9 @@ for split in 0 1 2 3 4; do
               --generate_concepts \
               --data_path $DATA_PATH
 
+    # c→y: diagnosis (no --model flag, uses --llm)
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_cy.log
     run_stage --dataset PH2 --split $split \
-              --model Explicd \
               --concept_extractor Explicd \
               --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
               --data_path $DATA_PATH
@@ -128,7 +123,6 @@ run_stage --dataset Derm7pt \
 
 LOG_FILE=$OUTPUT_BASE/logs/derm7_cy.log
 run_stage --dataset Derm7pt \
-          --model Explicd \
           --concept_extractor Explicd \
           --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
           --data_path $DATA_PATH
@@ -147,7 +141,6 @@ run_stage --dataset HAM10000 \
 
 LOG_FILE=$OUTPUT_BASE/logs/ham_cy.log
 run_stage --dataset HAM10000 \
-          --model Explicd \
           --concept_extractor Explicd \
           --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
           --data_path $DATA_PATH
@@ -159,5 +152,4 @@ echo "========================================="
 echo "✅ PIPELINE FINISHED"
 echo "Finished: $(date)"
 echo "========================================="
-
 echo "All outputs saved in: $OUTPUT_BASE"
