@@ -42,7 +42,6 @@ EOF
 # ==============================
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
-unset HF_HUB_OFFLINE                  # allow HF hub for BiomedCLIP cache
 export TIMM_FUSED_ATTN=0
 export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
