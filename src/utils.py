@@ -12,6 +12,11 @@ from sklearn.metrics import balanced_accuracy_score, confusion_matrix, classific
 from src.data.PH2_dataset import PH2Dataset
 from src.data.HAM10000_dataset import HAM10000Dataset
 from open_clip import create_model_from_pretrained
+import json
+import os
+from open_clip import create_model_and_transforms
+from open_clip.factory import _MODEL_CONFIGS
+
 
 def seed_everything(seed=0):
     """Sets random sets for torch operations.
@@ -171,42 +176,60 @@ def generate_template(label: str, concepts: list) -> str:
 def convert_numbers_to_concepts(concepts: list, concept_reference_dict):
         return [name for name, concept in zip(list(concept_reference_dict.keys()), concepts) if concept == 1]
 
-def create_explicd_config(gpu_id):
-    
-    
+###
 
+def create_explicd_config(gpu_id):
+   
     class Values:
         def __init__(self, **kwargs):
             for key, value in kwargs.items():
                 setattr(self, key, value)
-
+    
     # Define your configuration
     config = Values()
-
     config.gpu = str(gpu_id)
     config.dataset = "isic2018"
     config.model = "explicd"
-    config.load = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/explicd_best.pth" #"checkpoints/explicd_best.pth"
-    
+    config.load = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/explicd_best.pth"
+   
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu
-
     print('use model:', config.model)
-    
+   
     num_class_dict = {
         'isic2018': 7,
     }
-
     cls_weight_dict = {
-        'isic2018': [1, 0.5, 1.2, 1.3, 1, 2, 2], 
+        'isic2018': [1, 0.5, 1.2, 1.3, 1, 2, 2],
     }
-    
+   
     config.cls_weight = cls_weight_dict[config.dataset]
     config.num_class = num_class_dict[config.dataset]
-    _, config.preprocess = create_model_from_pretrained(
-    'hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224',
-    cache_dir='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint'
-        
-    )
 
+    # ====================== LOCAL BIOMEDCLIP LOADING ======================
+    local_dir = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedCLIP"
+    
+    print(f"Loading BiomedCLIP from local directory: {local_dir}")
+    
+    # Load config from local file
+    with open(f"{local_dir}/open_clip_config.json", "r") as f:
+        clip_config = json.load(f)
+    
+    model_cfg = clip_config["model_cfg"]
+    preprocess_cfg = clip_config.get("preprocess_cfg", {})
+    
+    # Register model config so open_clip recognizes it
+    model_name = "biomedclip_local"
+    if model_name not in _MODEL_CONFIGS:
+        _MODEL_CONFIGS[model_name] = model_cfg
+
+    # Create model + preprocess from local weights
+    model, _, config.preprocess = create_model_and_transforms(
+        model_name=model_name,
+        pretrained=f"{local_dir}/open_clip_pytorch_model.bin",
+        **{f"image_{k}": v for k, v in preprocess_cfg.items()}
+    )
+    
+    print("✅ Successfully loaded BiomedCLIP from local path")
+    # =====================================================================
 
     return config
