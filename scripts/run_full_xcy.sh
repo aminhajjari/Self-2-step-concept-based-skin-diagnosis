@@ -45,7 +45,7 @@ export HF_DATASETS_OFFLINE=1
 export TIMM_FUSED_ATTN=0
 export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-export HF_HUB_CACHE=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedCLIP
+
 
 # ==============================
 # PATHS
