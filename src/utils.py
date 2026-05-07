@@ -202,8 +202,11 @@ def create_explicd_config(gpu_id):
     
     config.cls_weight = cls_weight_dict[config.dataset]
     config.num_class = num_class_dict[config.dataset]
-    _, config.preprocess = create_model_from_pretrained('local-dir:/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedCLIP')
-
+    _, config.preprocess = create_model_from_pretrained(
+    'hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224',
+    cache_dir='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint'
+        
+    )
 
 
     return config
