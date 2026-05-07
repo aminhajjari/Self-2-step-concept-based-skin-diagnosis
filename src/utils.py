@@ -11,7 +11,6 @@ from datetime import datetime
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix, classification_report, roc_curve, auc, roc_auc_score
 from src.data.PH2_dataset import PH2Dataset
 from src.data.HAM10000_dataset import HAM10000Dataset
-from open_clip import create_model_from_pretrained
 import json
 import os
 from open_clip import create_model_and_transforms
