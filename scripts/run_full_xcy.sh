@@ -46,7 +46,8 @@ export TIMM_FUSED_ATTN=0
 export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-
+unset HF_HUB_OFFLINE
+export HF_HOME=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/hf_cache
 # ==============================
 # PATHS
 # ==============================
