@@ -211,10 +211,15 @@ def create_explicd_config(gpu_id):
    
     # Load config from local file
     with open(f"{local_dir}/open_clip_config.json", "r") as f:
-        clip_config = json.load(f)
-   
+    clip_config = json.load(f)
+
     model_cfg = clip_config["model_cfg"]
     preprocess_cfg = clip_config.get("preprocess_cfg", {})
+
+    # Redirect text encoder to local BiomedBERT (no internet needed on compute node)
+    BIOMEDBERT_LOCAL = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/BiomedBERT/models--microsoft--BiomedNLP-BiomedBERT-base-uncased-abstract/snapshots/d673b8835373c6fa116d6d8006b33d48734e305d"
+    model_cfg["text_cfg"]["hf_model_name"] = BIOMEDBERT_LOCAL
+    model_cfg["text_cfg"]["hf_tokenizer_name"] = BIOMEDBERT_LOCAL
    
     # Register model config so open_clip recognizes it
     model_name = "biomedclip_local"
