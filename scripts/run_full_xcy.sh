@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=xcy_selfrefine
 #SBATCH --account=def-arashmoh
 #SBATCH --time=12:00:00
@@ -30,24 +29,24 @@ source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
 echo "✓ Environment: $VIRTUAL_ENV"
 
 # ==============================
-# VERIFY OPENCV
+# FORCE OFFLINE MODE (Most Important)
 # ==============================
-python - <<EOF
-import cv2
-print("✓ OpenCV version:", cv2.__version__)
-EOF
-
-# ==============================
-# ENVIRONMENT VARIABLES
-# ==============================
+export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
+export HF_EVALUATE_OFFLINE=1
+
+export TOKENIZERS_PARALLELISM=false
 export TIMM_FUSED_ATTN=0
 export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-unset HF_HUB_OFFLINE
+# Force HuggingFace to use local cache only
 export HF_HOME=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/hf_cache
+export HF_HUB_CACHE=$HF_HOME
+
+echo "✓ Offline mode enforced: HF_HUB_OFFLINE=$HF_HUB_OFFLINE"
+
 # ==============================
 # PATHS
 # ==============================
@@ -75,78 +74,80 @@ nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
 # ==============================
+# QUICK MODEL FILES CHECK
+# ==============================
+echo "=== Checking Local Model Files ==="
+BCLIP="$PROJECT_PATH/checkpoint/BiomedCLIP"
+BBERT="$PROJECT_PATH/checkpoint/BiomedBERT/models--microsoft--BiomedNLP-BiomedBERT-base-uncased-abstract/snapshots/d673b8835373c6fa116d6d8006b33d48734e305d"
+
+ls -lh $BCLIP/open_clip_pytorch_model.bin 2>/dev/null && echo "✅ BiomedCLIP weights found" || echo "❌ BiomedCLIP weights MISSING"
+ls -lh $BCLIP/open_clip_config.json 2>/dev/null && echo "✅ BiomedCLIP config found" || echo "❌ BiomedCLIP config MISSING"
+ls -lh $BBERT/pytorch_model.bin 2>/dev/null && echo "✅ BiomedBERT weights found" || echo "❌ BiomedBERT weights MISSING"
+echo ""
+
+# ==============================
 # RUN FUNCTION
 # ==============================
 run_stage () {
-    python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE" || echo "⚠ Stage failed, continuing..."
-    python -c "import torch; torch.cuda.empty_cache()"
-    sleep 2
+    echo "Running: python run_x_to_c_to_y.py $@"
+    python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE"
+    python -c "import torch; torch.cuda.empty_cache()" 2>/dev/null || true
+    sleep 3
 }
 
 # ============================================
 # PH2 (5 splits)
 # ============================================
 echo "========== PH2 =========="
-
 for split in 0 1 2 3 4; do
     echo "---- PH2 Split $split ----"
-
-    # x→c: generate concepts
+    
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
     run_stage --dataset PH2 --split $split \
-              --model Explicd \
+              --model explicd \
               --concept_extractor Explicd \
               --generate_concepts \
-              --data_path $DATA_PATH
+              --data_path $DATA_PATH \
+              --raw_values False
 
-    # c→y: diagnosis (no --model flag, uses --llm)
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_cy.log
     run_stage --dataset PH2 --split $split \
               --concept_extractor Explicd \
-              --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
-              --data_path $DATA_PATH
+              --llm MMed \
+              --ckpt $CKPT_PATH \
+              --n_demos 0 \
+              --data_path $DATA_PATH \
+              --raw_values False
 
     echo "✓ PH2 split $split done"
 done
 
 # ============================================
-# Derm7pt
+# Derm7pt & HAM10000
 # ============================================
-echo "========== Derm7pt =========="
+for dataset in Derm7pt HAM10000; do
+    echo "========== $dataset =========="
+    
+    LOG_FILE=$OUTPUT_BASE/logs/${dataset}_xc.log
+    run_stage --dataset $dataset \
+              --model explicd \
+              --concept_extractor Explicd \
+              --generate_concepts \
+              --data_path $DATA_PATH \
+              --raw_values False
 
-LOG_FILE=$OUTPUT_BASE/logs/derm7_xc.log
-run_stage --dataset Derm7pt \
-          --model Explicd \
-          --concept_extractor Explicd \
-          --generate_concepts \
-          --data_path $DATA_PATH
+    LOG_FILE=$OUTPUT_BASE/logs/${dataset}_cy.log
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm MMed \
+              --ckpt $CKPT_PATH \
+              --n_demos 0 \
+              --data_path $DATA_PATH \
+              --raw_values False
 
-LOG_FILE=$OUTPUT_BASE/logs/derm7_cy.log
-run_stage --dataset Derm7pt \
-          --concept_extractor Explicd \
-          --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
-          --data_path $DATA_PATH
+    echo "✓ $dataset done"
+done
 
-# ============================================
-# HAM10000
-# ============================================
-echo "========== HAM10000 =========="
-
-LOG_FILE=$OUTPUT_BASE/logs/ham_xc.log
-run_stage --dataset HAM10000 \
-          --model Explicd \
-          --concept_extractor Explicd \
-          --generate_concepts \
-          --data_path $DATA_PATH
-
-LOG_FILE=$OUTPUT_BASE/logs/ham_cy.log
-run_stage --dataset HAM10000 \
-          --concept_extractor Explicd \
-          --llm MMed --ckpt $CKPT_PATH --n_demos 0 \
-          --data_path $DATA_PATH
-
-# ============================================
-# DONE
 # ============================================
 echo "========================================="
 echo "✅ PIPELINE FINISHED"
