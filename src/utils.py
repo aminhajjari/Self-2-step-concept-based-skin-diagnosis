@@ -211,7 +211,7 @@ def create_explicd_config(gpu_id):
    
     # Load config from local file
     with open(f"{local_dir}/open_clip_config.json", "r") as f:
-    clip_config = json.load(f)
+        clip_config = json.load(f)
 
     model_cfg = clip_config["model_cfg"]
     preprocess_cfg = clip_config.get("preprocess_cfg", {})
