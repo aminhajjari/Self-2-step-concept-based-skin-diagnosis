@@ -9,6 +9,8 @@
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
 
+set -e  # Exit immediately on any error
+
 echo "========================================="
 echo "FULL x→c→y PIPELINE WITH SELF-REFINE"
 echo "Job ID: ${SLURM_JOB_ID}"
@@ -91,6 +93,11 @@ echo ""
 run_stage () {
     echo "Running: python run_x_to_c_to_y.py $@"
     python run_x_to_c_to_y.py "$@" 2>&1 | tee "$LOG_FILE"
+    EXIT_CODE=${PIPESTATUS[0]}
+    if [ $EXIT_CODE -ne 0 ]; then
+        echo "❌ ERROR: python run_x_to_c_to_y.py $@ failed with exit code $EXIT_CODE"
+        exit $EXIT_CODE
+    fi
     python -c "import torch; torch.cuda.empty_cache()" 2>/dev/null || true
     sleep 3
 }
@@ -101,23 +108,25 @@ run_stage () {
 echo "========== PH2 =========="
 for split in 0 1 2 3 4; do
     echo "---- PH2 Split $split ----"
-    
+
+    # x -> c: generate concepts from images
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
     run_stage --dataset PH2 --split $split \
               --model explicd \
               --concept_extractor Explicd \
               --generate_concepts \
-              --data_path $DATA_PATH \
-              --raw_values False
+              --data_path $DATA_PATH
+    # NOTE: --raw_values omitted → defaults to False (store_true flag)
 
+    # c -> y: classify using LLM
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_cy.log
     run_stage --dataset PH2 --split $split \
               --concept_extractor Explicd \
               --llm MMed \
               --ckpt $CKPT_PATH \
               --n_demos 0 \
-              --data_path $DATA_PATH \
-              --raw_values False
+              --data_path $DATA_PATH
+    # NOTE: --raw_values omitted → defaults to False (store_true flag)
 
     echo "✓ PH2 split $split done"
 done
@@ -127,23 +136,25 @@ done
 # ============================================
 for dataset in Derm7pt HAM10000; do
     echo "========== $dataset =========="
-    
+
+    # x -> c: generate concepts from images
     LOG_FILE=$OUTPUT_BASE/logs/${dataset}_xc.log
     run_stage --dataset $dataset \
               --model explicd \
               --concept_extractor Explicd \
               --generate_concepts \
-              --data_path $DATA_PATH \
-              --raw_values False
+              --data_path $DATA_PATH
+    # NOTE: --raw_values omitted → defaults to False (store_true flag)
 
+    # c -> y: classify using LLM
     LOG_FILE=$OUTPUT_BASE/logs/${dataset}_cy.log
     run_stage --dataset $dataset \
               --concept_extractor Explicd \
               --llm MMed \
               --ckpt $CKPT_PATH \
               --n_demos 0 \
-              --data_path $DATA_PATH \
-              --raw_values False
+              --data_path $DATA_PATH
+    # NOTE: --raw_values omitted → defaults to False (store_true flag)
 
     echo "✓ $dataset done"
 done
