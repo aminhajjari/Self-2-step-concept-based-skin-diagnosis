@@ -80,7 +80,7 @@ echo ""
 # ==============================
 echo "=== Checking Local Model Files ==="
 BCLIP="$PROJECT_PATH/checkpoint/BiomedCLIP"
-BBERT="$PROJECT_PATH/checkpoint/BiomedBERT/models--microsoft--BiomedNLP-BiomedBERT-base-uncased-abstract/snapshots/d673b8835373c6fa116d6d8006b33d48734e305d"
+BBERT="$PROJECT_PATH/checkpoint/hf_cache/models--microsoft--BiomedCLIP-PubMedBERT_256-vit_base_patch16_224/snapshots/main"
 
 ls -lh $BCLIP/open_clip_pytorch_model.bin 2>/dev/null && echo "✅ BiomedCLIP weights found" || echo "❌ BiomedCLIP weights MISSING"
 ls -lh $BCLIP/open_clip_config.json 2>/dev/null && echo "✅ BiomedCLIP config found" || echo "❌ BiomedCLIP config MISSING"
