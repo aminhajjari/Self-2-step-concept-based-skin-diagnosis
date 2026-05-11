@@ -112,7 +112,7 @@ for split in 0 1 2 3 4; do
     # x -> c: generate concepts from images
     LOG_FILE=$OUTPUT_BASE/logs/ph2_${split}_xc.log
     run_stage --dataset PH2 --split $split \
-              --model explicd \
+              --model Explicd \
               --concept_extractor Explicd \
               --generate_concepts \
               --data_path $DATA_PATH
@@ -140,7 +140,7 @@ for dataset in Derm7pt HAM10000; do
     # x -> c: generate concepts from images
     LOG_FILE=$OUTPUT_BASE/logs/${dataset}_xc.log
     run_stage --dataset $dataset \
-              --model explicd \
+              --model Explicd \
               --concept_extractor Explicd \
               --generate_concepts \
               --data_path $DATA_PATH
