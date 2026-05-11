@@ -84,7 +84,7 @@ BBERT="$PROJECT_PATH/checkpoint/hf_cache/models--microsoft--BiomedCLIP-PubMedBER
 
 ls -lh $BCLIP/open_clip_pytorch_model.bin 2>/dev/null && echo "✅ BiomedCLIP weights found" || echo "❌ BiomedCLIP weights MISSING"
 ls -lh $BCLIP/open_clip_config.json 2>/dev/null && echo "✅ BiomedCLIP config found" || echo "❌ BiomedCLIP config MISSING"
-ls -lh $BBERT/pytorch_model.bin 2>/dev/null && echo "✅ BiomedBERT weights found" || echo "❌ BiomedBERT weights MISSING"
+ls -lh $BBERT/open_clip_pytorch_model.bin 2>/dev/null && echo "✅ BiomedBERT (PubMedBERT) weights found" || echo "❌ BiomedBERT weights MISSING"
 echo ""
 
 # ==============================
