@@ -25,7 +25,7 @@ class MMedBasedRefiner:
     This is the FREE alternative to GPT-4o that runs on your cluster.
     """
     
-    def __init__(self, ckpt="Henrychur/MMed-Llama-3-8B"):
+    def __init__(self, ckpt="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns"):
         """
         Args:
             ckpt: MMed checkpoint to use
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     print("Testing MMed-LLM Refiner (Enhanced Version)")
     print("=" * 80)
     
-    refiner = MMedBasedRefiner(ckpt="Henrychur/MMed-Llama-3-8B")
+    refiner = MMedBasedRefiner(ckpt="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns")
     
     test_concepts = (
         "The color is highly variable, often with multiple colors (black, brown, red, white, blue), "
