@@ -21,7 +21,7 @@ from mmed_refiner import MMedBasedRefiner
 # ==============================
 # LOCAL CHECKPOINT PATH
 # ==============================
-MMED_CKPT_PATH = '/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B'
+MMED_CKPT_PATH = '/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns'
 
 
 
@@ -327,10 +327,10 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:  
-            df_reports = pd.read_csv(f"data/concept_prediction/PH2_split_{split}_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/PH2_split_{split}_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
         
-        PH2_TEST = pd.read_csv(f"data/PH2/splits/PH2_test_split_{split}.csv")
-        PH2_TRAIN = pd.read_csv(f"data/PH2/splits/PH2_train_split_{split}.csv")
+        PH2_TEST = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_test_split_{split}.csv")
+        PH2_TRAIN = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_train_split_{split}.csv")
         df_reports_test = df_reports.loc[df_reports.image_id.isin(PH2_TEST.images.to_list())]
         df_reports_train = df_reports.loc[df_reports.image_id.isin(PH2_TRAIN.images.to_list())]
         df_reports_gt = df_reports
@@ -338,25 +338,25 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:
-            df_reports = pd.read_csv(f"data/concept_prediction/Derm7pt_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/Derm7pt_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
         
-        D7_TEST = pd.read_csv("data/Derm7pt/splits/derm7pt_test.csv")
-        D7_TRAIN = pd.read_csv("data/Derm7pt/splits/derm7pt_train.csv")
+        D7_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_test.csv")
+        D7_TRAIN = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_train.csv")
         df_reports_test = df_reports.loc[df_reports.image_id.isin(D7_TEST.images.to_list())]
         df_reports_train = df_reports.loc[df_reports.image_id.isin(D7_TRAIN.images.to_list())]
-        df_reports_gt = pd.read_csv("data/Derm7pt_dermatology_reports_explicd_ontology.csv")
+        df_reports_gt = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt_dermatology_reports_explicd_ontology.csv") if use_demos else None
     elif dataset == 'HAM10000':
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:
-            df_reports = pd.read_csv(f"data/concept_prediction/HAM10000_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/HAM10000_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
 
-        HAM_TEST = pd.read_csv("data/HAM10000/splits/HAM10000_test.csv")
-        HAM_TRAIN = pd.read_csv("data/HAM10000/splits/HAM10000_train.csv")
-        HAM_VAL = pd.read_csv("data/HAM10000/splits/HAM10000_val.csv")
+        HAM_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_test.csv")
+        HAM_TRAIN = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_train.csv")
+        HAM_VAL = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_val.csv")
         df_reports_test = df_reports.loc[df_reports.image_id.isin(HAM_TEST.image_id.to_list())]
         df_reports_train = pd.concat([df_reports.loc[df_reports.image_id.isin(HAM_TRAIN.image_id.to_list())], df_reports.loc[df_reports.image_id.isin(HAM_VAL.image_id.to_list())]])
-        df_reports_gt = pd.read_csv("data/HAM10000_dermatology_reports_explicd_ontology.csv")
+        df_reports_gt = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000_dermatology_reports_explicd_ontology.csv") if use_demos else None
     else:
         raise ValueError(f"The dataset {dataset} is not implemented.")
 
@@ -469,13 +469,13 @@ def classification(model_name:str, dataset: str, ckpt: str, split=None, ground_t
         raise ValueError("File not found!")
 
     if dataset == "PH2":
-        PH2_TEST = pd.read_csv(f"data/PH2/splits/PH2_test_split_{split}.csv")
+        PH2_TEST = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_test_split_{split}.csv")
         df_filtered = df_responses.loc[df_responses.image_id.isin(PH2_TEST.images.to_list())]
     elif dataset == "Derm7pt":
-        D7_TEST = pd.read_csv("data/Derm7pt/splits/derm7pt_test.csv")
+        D7_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_test.csv")
         df_filtered = df_responses.loc[df_responses.image_id.isin(D7_TEST.images.to_list())]
     elif dataset == "HAM10000":
-        HAM_TEST = pd.read_csv("data/HAM10000/splits/HAM10000_test.csv")
+        HAM_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_test.csv")
         df_filtered = df_responses.loc[df_responses.image_id.isin(HAM_TEST.image_id.to_list())]
 
     mapping = {
@@ -500,7 +500,7 @@ if __name__ == "__main__":
     parser.add_argument('--split', type=int, help='Split of the dataset if exists', default=None)
     parser.add_argument('--raw_values', action="store_true", help='Include this parameter to save concepts along its concept presence score.')
     #parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='Henrychur/MMed-Llama-3-8B')
-    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B')  # was 'Henrychur/MMed-Llama-3-8B'
+    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns')  # was 'Henrychur/MMed-Llama-3-8B'
     parser.add_argument('--concept_extractor', type=str, help='Name of the model used to extract the concepts', default='Explicd')  # was 'MONET'
     parser.add_argument('--concept_reference_dict', type=str, help='Name of the model used to extract the concepts', default='PH2')
     parser.add_argument('--llm', type=str, help='Name of the LLM used to provide the final diagnosis. Choose between (MMed, Mistral)', default='MMed')
