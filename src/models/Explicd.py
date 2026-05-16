@@ -46,8 +46,8 @@ class Explicd:
         # Delete the following if want to use biomedclip weights
         #vit = timm.create_model('vit_base_patch16_224.orig_in21k', pretrained=True, num_classes=config.num_class)
         vit = timm.create_model('vit_base_patch16_224.orig_in21k', pretrained=False, num_classes=config.num_class)
-        vit.load_state_dict(torch.load('/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/ViT/vit_base_patch16_224_orig_in21k.pth'))
         vit.head = nn.Identity()
+        vit.load_state_dict(torch.load('/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/ViT/vit_base_patch16_224_orig_in21k.pth', weights_only=True))
         self.model.model.visual.trunk.load_state_dict(vit.state_dict())
 
         if config.load:
