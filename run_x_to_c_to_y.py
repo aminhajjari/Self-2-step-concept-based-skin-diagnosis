@@ -432,9 +432,9 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     
     if model_name == "MMed":
         if split != None:
-            file_path = f"results/label_prediction/{dataset}_split_{split}_{os.path.basename(ckpt)}_diagnostic_report_validation_..."
+            file_path = f"results/label_prediction/{dataset}_split_{split}_{os.path.basename(ckpt)}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv"
         else:
-            file_path = f"results/label_prediction/{dataset}_{os.path.basename(ckpt)}_diagnostic_report_validation_..."
+            file_path = f"results/label_prediction/{dataset}_{os.path.basename(ckpt)}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv"
     elif model_name in ["Mistral", "GPT"]:
         if split != None:
             file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv"
@@ -457,9 +457,9 @@ def classification(model_name:str, dataset: str, ckpt: str, split=None, ground_t
 
     if model_name == "MMed":
         if split != None:
-            file_path = f"results/label_prediction/{dataset}_split_{split}_{os.path.basename(ckpt)}_diagnostic_report_validation_..."
+            df_responses = pd.read_csv(f"results/label_prediction/{dataset}_split_{split}_{os.path.basename(ckpt)}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv")
         else:
-            file_path = f"results/label_prediction/{dataset}_{os.path.basename(ckpt)}_diagnostic_report_validation_..."
+            df_responses = pd.read_csv(f"results/label_prediction/{dataset}_{os.path.basename(ckpt)}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv")
     elif model_name in ["Mistral", "GPT"]:
         if split != None:
             df_responses = pd.read_csv(f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}.csv")
