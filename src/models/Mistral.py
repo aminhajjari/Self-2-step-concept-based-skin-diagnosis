@@ -8,9 +8,16 @@ import torch
 
 class Mistral:
 
-    def __init__(self, max_memory=None):
-        self.model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3", device_map="auto", max_memory=max_memory, torch_dtype=torch.float16)
-        self.tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3", use_fast=False)
+    MISTRAL_LOCAL = (
+    "/home/gkianfar/scratch/Amin/concept/maincode/"
+    "Self-2-step-concept-based-skin-diagnosis/checkpoint/Mistral-7B"
+    )
+
+    def __init__(self, ckpt=MISTRAL_LOCAL, max_memory=None):
+        self.model = AutoModelForCausalLM.from_pretrained(
+            ckpt, device_map="auto",
+            max_memory=max_memory, torch_dtype=torch.float16)
+        self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=False)
 
     def get_prompt(self, instruction, query, demos=None):
         """Creates the prompt"""
