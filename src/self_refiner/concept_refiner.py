@@ -72,7 +72,8 @@ class SimpleRuleBasedRefiner:
 
         # Fix 3: Smooth texture → Flat elevation
         if 'smooth' in refined.get('texture', '').lower():
-            if 'raised' in refined.get('elevation', '').lower():
+            elev = refined.get('elevation', '').lower()
+            if 'ulcerat' in elev or 'raised with possible' in elev:
                 refined['elevation'] = 'flat to slightly raised'
 
         # Fix 4: Atypical patterns → Asymmetry
