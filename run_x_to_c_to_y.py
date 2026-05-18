@@ -114,7 +114,15 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         config = create_explicd_config(gpu_id=0)    # TODO: Make this dynamically
         model = Explicd(config=config)
         print("\n[INFO] Loading MMed refiner for self-refine...")
-        mmed_refiner = MMedBasedRefiner(ckpt=MMED_CKPT_PATH)
+        if args_refiner == 'mmed':
+            from mmed_refiner import MMedBasedRefiner
+            mmed_refiner = MMedBasedRefiner(ckpt=MMED_CKPT_PATH)
+        elif args_refiner == 'mistral':
+            from mistral_refiner import MistralBasedRefiner
+            mmed_refiner = MistralBasedRefiner()
+        elif args_refiner == 'rule':
+            from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
+            mmed_refiner = SimpleRuleBasedRefiner()
         print("[INFO] MMed refiner ready!")
             
     else:
