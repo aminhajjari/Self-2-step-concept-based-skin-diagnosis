@@ -156,7 +156,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Calculate Metrics')
     parser.add_argument('--model', type=str, help='Name of the model', default='CLIP')
     parser.add_argument('--subdir', type=str, help='Subdir', default='0-shot')
-    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='MMed-Llama-3-8B')
+    parser.add_argument('--ckpt', type=str, help='Name of the model checkpoint', default='MMed-Llama-3-8B-EnIns')
     parser.add_argument('--task', type=str, help='Name of the task', default='PH2_eval')
     parser.add_argument('--task_model', type=str, help='Name of the task (open-ended)', default=None)
     parser.add_argument('--dataset', type=str, help='Dataset to evaluate', default='Derm7pt')
