@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class MMedLlama3:
 
-    def __init__(self, ckpt="Henrychur/MMed-Llama-3-8B") -> None:
+    def __init__(self, ckpt="Henrychur/MMed-Llama-3-8B-EnIns") -> None:
         """
         Initialize the attributes of the class.
 
