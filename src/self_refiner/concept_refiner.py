@@ -34,7 +34,10 @@ class ConceptConsistencyRules:
         texture = concepts_dict.get('texture', '').lower()
         elevation = concepts_dict.get('elevation', '').lower()
         
-        if 'smooth' in texture and ('ulcerated' in texture or 'raised' in elevation):
+        elevation_is_problematic = (
+            'ulcerat' in elevation or 'raised with possible' in elevation
+        )
+        if 'smooth' in texture and elevation_is_problematic:
             violations.append(
                 "Smooth texture conflicts with ulcerated/raised features"
             )
