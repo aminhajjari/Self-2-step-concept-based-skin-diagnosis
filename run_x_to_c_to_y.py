@@ -77,7 +77,7 @@ concept_reference_dict_HAM10000 = {
 def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
            n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', 
-           predict_for_train_set=False, data_path='data'):
+           predict_for_train_set=False, data_path='data', concept_reference_dict: str = 'PH2'):
     """Predicts concepts from MONET.
 
     Args:
