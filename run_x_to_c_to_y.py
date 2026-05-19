@@ -518,11 +518,7 @@ if __name__ == "__main__":
     parser.add_argument('--gt_concepts', action="store_true", help='Whether or not use gt concepts in the setting c -> y')
     parser.add_argument('--generate_concepts', action="store_true", help='Run the x->c concept generation step')
     parser.add_argument('--data_path', type=str, default='data', help='Root path to data directory')
-    parser.add_argument(
-    '--refiner', type=str, default='mmed',
-    choices=['mmed', 'mistral', 'rule'],
-    help='Which refiner to use for self-refine: mmed | mistral | rule'
-    )
+    parser.add_argument('--refiner', type=str, default='mmed', choices=['mmed', 'mistral', 'rule'], help='Self-refiner: mmed | mistral | rule')
     args = parser.parse_args()
 
     seed_everything(seed=42)
