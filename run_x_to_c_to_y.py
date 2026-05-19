@@ -113,17 +113,20 @@ def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: in
         from src.utils import create_explicd_config
         config = create_explicd_config(gpu_id=0)    # TODO: Make this dynamically
         model = Explicd(config=config)
-        print("\n[INFO] Loading MMed refiner for self-refine...")
-        if args_refiner == 'mmed':
+        if refiner_name == 'mmed':
             from mmed_refiner import MMedBasedRefiner
+            print("\n[INFO] Loading MMed refiner...")
             mmed_refiner = MMedBasedRefiner(ckpt=MMED_CKPT_PATH)
-        elif args_refiner == 'mistral':
+            print("[INFO] MMed refiner ready!")
+        elif refiner_name == 'mistral':
             from mistral_refiner import MistralBasedRefiner
+            print("\n[INFO] Loading Mistral refiner...")
             mmed_refiner = MistralBasedRefiner()
-        elif args_refiner == 'rule':
+            print("[INFO] Mistral refiner ready!")
+        elif refiner_name == 'rule':
             from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
+            print("\n[INFO] Using rule-based refiner (no LLM).")
             mmed_refiner = SimpleRuleBasedRefiner()
-        print("[INFO] MMed refiner ready!")
             
     else:
         raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
