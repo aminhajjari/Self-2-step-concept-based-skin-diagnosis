@@ -546,8 +546,14 @@ if __name__ == "__main__":
                 split=args.split, raw_values=args.raw_values,
                 predict_for_train_set=args.predict_for_train_set, data_path=args.data_path, refiner_name=args.refiner) 
             
-    c_to_y(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, raw_values=args.raw_values, concept_extractor=args.concept_extractor, report_path=args.report_path, use_demos=args.use_demos, n_demos=args.n_demos, ground_truth_concepts=args.gt_concepts)
-    classification(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, ground_truth_concepts=args.gt_concepts,  raw_values=args.raw_values, concept_extractor=args.concept_extractor, n_demos=args.n_demos)
+        c_to_y(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, 
+           raw_values=args.raw_values, concept_extractor=args.concept_extractor, 
+           report_path=args.report_path, use_demos=args.use_demos, n_demos=args.n_demos, 
+           ground_truth_concepts=args.gt_concepts, refiner_name=args.refiner)
+        classification(model_name=args.llm, dataset=args.dataset, ckpt=args.ckpt, split=args.split, 
+                   ground_truth_concepts=args.gt_concepts, raw_values=args.raw_values, 
+                   concept_extractor=args.concept_extractor, n_demos=args.n_demos, 
+                   refiner_name=args.refiner)
 
     print("\n")
     print("#==============================================================================")
