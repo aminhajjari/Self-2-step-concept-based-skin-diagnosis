@@ -528,6 +528,7 @@ if __name__ == "__main__":
     print(f"# Status:    Running...")
     print(f"# LLM:       {args.llm}")
     print(f"# Dataset:   {args.dataset}")
+    print(f"# Refiner:   {args.refiner}")
     print(f"# n-shots:   {args.n_demos}")
     print(f"# Date:      {get_current_date()}")
     print("#==============================================================================")
