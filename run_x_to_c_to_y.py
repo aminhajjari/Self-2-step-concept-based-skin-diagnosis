@@ -478,7 +478,7 @@ def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_value
             file_path = f"results/label_prediction/{dataset}_{os.path.basename(ckpt)}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}.csv"
     else:
         raise ValueError("File not found!")
-
+    df_responses = pd.read_csv(file_path)
     if dataset == "PH2":
         PH2_TEST = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_test_split_{split}.csv")
         df_filtered = df_responses.loc[df_responses.image_id.isin(PH2_TEST.images.to_list())]
