@@ -74,7 +74,7 @@ concept_reference_dict_HAM10000 = {
 }
 
 
-def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: int=None, raw_values: bool=False, predict_for_train_set: bool=False, data_path: str='data') -> None:
+def x_to_c(model_name: str, dataset: str, concept_reference_dict: str, split: int=None, raw_values: bool=False, predict_for_train_set: bool=False, data_path: str='data', refiner_name: str='mmed') -> None:
     """Predicts concepts from MONET.
 
     Args:
