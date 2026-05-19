@@ -74,7 +74,10 @@ concept_reference_dict_HAM10000 = {
 }
 
 
-def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed'):
+def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=False, 
+           concept_extractor:str=None, report_path: str = None, use_demos=False, 
+           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', 
+           predict_for_train_set=False, data_path='data'):
     """Predicts concepts from MONET.
 
     Args:
@@ -327,7 +330,9 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     gc.collect()
     torch.cuda.empty_cache()
 
-def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False):
+def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, 
+           concept_extractor:str=None, report_path: str = None, use_demos=False, 
+           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed'):
     """
     Report template:
     > The lesion is diagnosed as {label}. The presence of {", ".join(item for item in concepts)} are highly suggestive of {label}.
