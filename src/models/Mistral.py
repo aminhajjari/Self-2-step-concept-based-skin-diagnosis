@@ -14,8 +14,8 @@ class Mistral:
     )
 
     def __init__(self, ckpt="mistralai/Mistral-7B-Instruct-v0.3", max_memory=None):
-    self.model = AutoModelForCausalLM.from_pretrained(ckpt, device_map="auto", max_memory=max_memory, torch_dtype=torch.float16)
-    self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=False)
+        self.model = AutoModelForCausalLM.from_pretrained(ckpt, device_map="auto", max_memory=max_memory, torch_dtype=torch.float16)
+        self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=False)
 
     def get_prompt(self, instruction, query, demos=None):
         """Creates the prompt"""
