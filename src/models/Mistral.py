@@ -10,12 +10,16 @@ class Mistral:
 
     MISTRAL_LOCAL = (
     "/home/gkianfar/scratch/Amin/concept/maincode/"
-    "Self-2-step-concept-based-skin-diagnosis/checkpoint/Mistral-7B"
+    "Self-2-step-concept-based-skin-diagnosis/checkpoint/Mistral-7B-Instruct"
     )
 
-    def __init__(self, ckpt="mistralai/Mistral-7B-Instruct-v0.3", max_memory=None):
-        self.model = AutoModelForCausalLM.from_pretrained(ckpt, device_map="auto", max_memory=max_memory, torch_dtype=torch.float16)
-        self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=False)
+def __init__(self, ckpt=None, max_memory=None):
+    if ckpt is None:
+        ckpt = self.MISTRAL_LOCAL
+    self.model = AutoModelForCausalLM.from_pretrained(
+        ckpt, device_map="auto", max_memory=max_memory, torch_dtype=torch.float16
+    )
+    self.tokenizer = AutoTokenizer.from_pretrained(ckpt, use_fast=False)
 
     def get_prompt(self, instruction, query, demos=None):
         """Creates the prompt"""
