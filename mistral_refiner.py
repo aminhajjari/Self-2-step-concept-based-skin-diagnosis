@@ -14,7 +14,7 @@ import re
 # ── local checkpoint path ──────────────────────────────────────────────────────
 MISTRAL_LOCAL_CKPT = (
     "/home/gkianfar/scratch/Amin/concept/maincode/"
-    "Self-2-step-concept-based-skin-diagnosis/checkpoint/Mistral-7B"
+    "Self-2-step-concept-based-skin-diagnosis/checkpoint/Mistral-7B-Instruct"
 )
 
 
