@@ -19,31 +19,21 @@ N_SPLITS    = 5
 
 # The 3 configs to compare
 CONFIGS = [
-    {
-        "label"  : "ExpLICD+MMed",
-        "llm"    : "MMed-Llama-3-8B-EnIns",
-        "refiner": "mmed",
-    },
-    {
-        "label"  : "ExpLICD+Mistral",
-        "llm"    : "Mistral",
-        "refiner": "mistral",
-    },
-    {
-        "label"  : "ExpLICD+RuleBased",
-        "llm"    : "MMed-Llama-3-8B-EnIns",
-        "refiner": "rule",
-    },
+    {"label": "ExpLICD+Rule+MMed",       "llm": "MMed",    "refiner": "rule"},
+    {"label": "ExpLICD+Rule+Mistral",     "llm": "Mistral", "refiner": "rule"},
+    {"label": "ExpLICD+Mistral+Mistral",  "llm": "Mistral", "refiner": "mistral"},
+    {"label": "ExpLICD+Mistral+MMed",     "llm": "MMed",    "refiner": "mistral"},
+    {"label": "ExpLICD+MMed+MMed",        "llm": "MMed",    "refiner": "mmed"},
+    {"label": "ExpLICD+MMed+Mistral",     "llm": "Mistral", "refiner": "mmed"},
 ]
-
 PAPER_BACC = {"PH2": 78.07, "Derm7pt": 78.56, "HAM10000": 76.00}
 
 # ── filename builder ───────────────────────────────────────────────────────────
 def csv_path(cfg, dataset, split=None):
     llm     = cfg["llm"]
     refiner = cfg["refiner"]
-    suffix  = (f"raw_values_False_gt_concepts_False"
-               f"_model_extractor_Explicd_n_demos_0_refiner_{refiner}")
+    suffix = (f"gt_concepts_False_raw_values_False"
+              f"_model_extractor_Explicd_n_demos_0_refiner_{refiner}")
     if split is not None:
         name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
     else:
