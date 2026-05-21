@@ -519,6 +519,7 @@ if __name__ == "__main__":
     parser.add_argument('--split', type=int, default=None)
     parser.add_argument('--raw_values', action="store_true")
     parser.add_argument('--ckpt', type=str, default='/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns')
+    parser.add_argument('--classifier_ckpt', type=str, default=None, help='Checkpoint for classifier LLM (if different from refiner ckpt)')
     parser.add_argument('--concept_extractor', type=str, default='Explicd')
     parser.add_argument('--concept_reference_dict', type=str, default='PH2')
     parser.add_argument('--llm', type=str, default='MMed')
@@ -555,6 +556,8 @@ if __name__ == "__main__":
                data_path=args.data_path, 
                refiner_name=args.refiner)
 
+            
+    classifier_ckpt = args.classifier_ckpt if args.classifier_ckpt else args.ckpt
     # ====================== STEP 2: Concept to Label (C → Y) ======================
     c_to_y(model_name=args.llm, 
            dataset=args.dataset, 
