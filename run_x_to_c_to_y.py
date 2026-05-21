@@ -561,7 +561,7 @@ if __name__ == "__main__":
     # ====================== STEP 2: Concept to Label (C → Y) ======================
     c_to_y(model_name=args.llm, 
            dataset=args.dataset, 
-           ckpt=args.ckpt, 
+           ckpt=classifier_ckpt, 
            split=args.split,
            raw_values=args.raw_values, 
            concept_extractor=args.concept_extractor,
@@ -574,7 +574,7 @@ if __name__ == "__main__":
     # ====================== STEP 3: Evaluate ======================
     classification(model_name=args.llm, 
                    dataset=args.dataset, 
-                   ckpt=args.ckpt, 
+                   ckpt=classifier_ckpt, 
                    split=args.split,
                    ground_truth_concepts=args.gt_concepts, 
                    raw_values=args.raw_values,
