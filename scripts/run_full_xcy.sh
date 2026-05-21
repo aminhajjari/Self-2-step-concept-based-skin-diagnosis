@@ -38,6 +38,7 @@ PROJECT_PATH="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-b
 DATA_PATH="$PROJECT_PATH/data"
 OUTPUT_BASE="/home/gkianfar/scratch/Amin/concept/outputs"
 MMED_CKPT="$PROJECT_PATH/checkpoint/MMed-Llama-3-8B-EnIns"
+MISTRAL_CKPT="$PROJECT_PATH/checkpoint/Mistral-7B-Instruct"
 
 cd $PROJECT_PATH || exit 1
 
