@@ -65,52 +65,13 @@ run_stage() {
     sleep 2
 }
 
+
 # ══════════════════════════════════════════════════════════════════════════════
 # PH2  (5-fold cross-validation)
-# We generate concepts once per split (reused across all 3 configs)
+# Generate concepts once per refiner type — reused across classifier configs
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
-echo "══════════  PH2 — generating concepts (mmed refiner)  ══════════"
-for split in 0 1 2 3 4; do
-    echo "--- PH2 split $split : x→c (mmed refiner) ---"
-    run_stage --dataset PH2 --split $split \
-              --model Explicd --concept_extractor Explicd \
-              --generate_concepts --data_path $DATA_PATH \
-              --refiner mmed
-done
-
-echo ""
-echo "══════════  PH2 — c→y for all 3 configs  ══════════"
-
-# Config (a): MMed refiner + MMed LLM
-echo "--- PH2: Config (a) ExpLICD+MMed ---"
-for split in 0 1 2 3 4; do
-    run_stage --dataset PH2 --split $split \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              --n_demos 0 --refiner mmed
-done
-
-# Config (b): Mistral refiner + Mistral LLM
-# Need concepts with Mistral refiner — generate separately
-echo "--- PH2: generating concepts (mistral refiner) ---"
-for split in 0 1 2 3 4; do
-    run_stage --dataset PH2 --split $split \
-              --model Explicd --concept_extractor Explicd \
-              --generate_concepts --data_path $DATA_PATH \
-              --refiner mistral
-done
-
-echo "--- PH2: Config (b) ExpLICD+Mistral ---"
-for split in 0 1 2 3 4; do
-    run_stage --dataset PH2 --split $split \
-              --concept_extractor Explicd \
-              --llm Mistral \
-              --n_demos 0 --refiner mistral
-done
-
-# Config (c): Rule-based refiner + MMed LLM
-echo "--- PH2: generating concepts (rule refiner) ---"
+echo "══════════  PH2 — generating concepts (rule refiner)  ══════════"
 for split in 0 1 2 3 4; do
     run_stage --dataset PH2 --split $split \
               --model Explicd --concept_extractor Explicd \
@@ -118,12 +79,82 @@ for split in 0 1 2 3 4; do
               --refiner rule
 done
 
-echo "--- PH2: Config (c) ExpLICD+RuleBased ---"
+echo ""
+echo "══════════  PH2 — generating concepts (mistral refiner)  ══════════"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --model Explicd --concept_extractor Explicd \
+              --generate_concepts --data_path $DATA_PATH \
+              --refiner mistral
+done
+
+echo ""
+echo "══════════  PH2 — generating concepts (mmed refiner)  ══════════"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --model Explicd --concept_extractor Explicd \
+              --generate_concepts --data_path $DATA_PATH \
+              --refiner mmed
+done
+
+echo ""
+echo "══════════  PH2 — c→y for all 6 configs  ══════════"
+
+# Config A: rule refiner + MMed classifier
+echo "--- PH2: Config A (Rule + MMed) ---"
 for split in 0 1 2 3 4; do
     run_stage --dataset PH2 --split $split \
               --concept_extractor Explicd \
               --llm MMed --ckpt $MMED_CKPT \
               --n_demos 0 --refiner rule
+done
+
+# Config B: rule refiner + Mistral classifier
+echo "--- PH2: Config B (Rule + Mistral) ---"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MMED_CKPT \
+              --classifier_ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner rule
+done
+
+# Config C: mistral refiner + Mistral classifier
+echo "--- PH2: Config C (Mistral + Mistral) ---"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner mistral
+done
+
+# Config D: mistral refiner + MMed classifier
+echo "--- PH2: Config D (Mistral + MMed) ---"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MISTRAL_CKPT \
+              --classifier_ckpt $MMED_CKPT \
+              --n_demos 0 --refiner mistral
+done
+
+# Config E: mmed refiner + MMed classifier
+echo "--- PH2: Config E (MMed + MMed) ---"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MMED_CKPT \
+              --n_demos 0 --refiner mmed
+done
+
+# Config F: mmed refiner + Mistral classifier
+echo "--- PH2: Config F (MMed + Mistral) ---"
+for split in 0 1 2 3 4; do
+    run_stage --dataset PH2 --split $split \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MMED_CKPT \
+              --classifier_ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner mmed
 done
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -133,44 +164,69 @@ for dataset in Derm7pt HAM10000; do
     echo ""
     echo "══════════  $dataset  ══════════"
 
-    # Config (a): MMed refiner + MMed LLM
-    echo "--- $dataset: x→c (mmed refiner) ---"
-    run_stage --dataset $dataset \
-              --model Explicd --concept_extractor Explicd \
-              --generate_concepts --data_path $DATA_PATH \
-              --refiner mmed
-
-    echo "--- $dataset: Config (a) ExpLICD+MMed ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              --n_demos 0 --refiner mmed
-
-    # Config (b): Mistral refiner + Mistral LLM
-    echo "--- $dataset: x→c (mistral refiner) ---"
-    run_stage --dataset $dataset \
-              --model Explicd --concept_extractor Explicd \
-              --generate_concepts --data_path $DATA_PATH \
-              --refiner mistral
-
-    echo "--- $dataset: Config (b) ExpLICD+Mistral ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm Mistral \
-              --n_demos 0 --refiner mistral
-
-    # Config (c): Rule-based refiner + MMed LLM
+    # --- concept generation (once per refiner) ---
     echo "--- $dataset: x→c (rule refiner) ---"
     run_stage --dataset $dataset \
               --model Explicd --concept_extractor Explicd \
               --generate_concepts --data_path $DATA_PATH \
               --refiner rule
 
-    echo "--- $dataset: Config (c) ExpLICD+RuleBased ---"
+    echo "--- $dataset: x→c (mistral refiner) ---"
+    run_stage --dataset $dataset \
+              --model Explicd --concept_extractor Explicd \
+              --generate_concepts --data_path $DATA_PATH \
+              --refiner mistral
+
+    echo "--- $dataset: x→c (mmed refiner) ---"
+    run_stage --dataset $dataset \
+              --model Explicd --concept_extractor Explicd \
+              --generate_concepts --data_path $DATA_PATH \
+              --refiner mmed
+
+    # --- Config A: rule + MMed ---
+    echo "--- $dataset: Config A (Rule + MMed) ---"
     run_stage --dataset $dataset \
               --concept_extractor Explicd \
               --llm MMed --ckpt $MMED_CKPT \
               --n_demos 0 --refiner rule
+
+    # --- Config B: rule + Mistral ---
+    echo "--- $dataset: Config B (Rule + Mistral) ---"
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MMED_CKPT \
+              --classifier_ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner rule
+
+    # --- Config C: mistral + Mistral ---
+    echo "--- $dataset: Config C (Mistral + Mistral) ---"
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner mistral
+
+    # --- Config D: mistral + MMed ---
+    echo "--- $dataset: Config D (Mistral + MMed) ---"
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MISTRAL_CKPT \
+              --classifier_ckpt $MMED_CKPT \
+              --n_demos 0 --refiner mistral
+
+    # --- Config E: mmed + MMed ---
+    echo "--- $dataset: Config E (MMed + MMed) ---"
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MMED_CKPT \
+              --n_demos 0 --refiner mmed
+
+    # --- Config F: mmed + Mistral ---
+    echo "--- $dataset: Config F (MMed + Mistral) ---"
+    run_stage --dataset $dataset \
+              --concept_extractor Explicd \
+              --llm Mistral --ckpt $MMED_CKPT \
+              --classifier_ckpt $MISTRAL_CKPT \
+              --n_demos 0 --refiner mmed
 
     echo "✓ $dataset done"
 done
