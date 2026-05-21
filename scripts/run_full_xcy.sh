@@ -12,7 +12,7 @@
 set -e
 
 echo "========================================="
-echo "  x→c→y PIPELINE — 3 CONFIGS COMPARISON"
+echo "  x→c→y PIPELINE — 6 CONFIGS COMPARISON"
 echo "  Job ID: ${SLURM_JOB_ID}"
 echo "  Started: $(date)"
 echo "========================================="
