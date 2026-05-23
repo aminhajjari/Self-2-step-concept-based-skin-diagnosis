@@ -63,8 +63,6 @@ def csv_path(cfg, dataset, split=None):
     else:
         name = f"{dataset}_{llm}_diagnostic_report_validation_{suffix}.csv"
     return RESULTS_DIR / name
-PAPER_BACC = {"PH2": 78.07, "Derm7pt": 78.56, "HAM10000": 76.00}
-
 
 
 # ── metrics ────────────────────────────────────────────────────────────────────
