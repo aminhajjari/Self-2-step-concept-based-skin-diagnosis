@@ -113,6 +113,29 @@ class SimpleRuleBasedRefiner:
             if 'symmetrical' in refined.get('symmetry', '').lower():
                 refined['symmetry'] = 'asymmetrical'
 
+        # Fix 5: Irregular shape → Asymmetry
+        if 'irregular' in refined.get('shape', '').lower():
+            sym = refined.get('symmetry', '').lower()
+            if 'symmetrical' in sym and 'asymmetric' not in sym:
+                refined['symmetry'] = 'asymmetrical'
+
+        # Fix 6: Atypical patterns → Irregular border
+        if 'atypical' in refined.get('dermoscopic patterns', '').lower():
+            if 'sharp' in refined.get('border', '').lower():
+                refined['border'] = 'often blurry and irregular'
+
+        # Fix 7: Flat elevation + Ulcerated texture → fix texture
+        if 'flat' in refined.get('elevation', '').lower():
+            if 'ulcerated' in refined.get('texture', '').lower():
+                refined['texture'] = 'smooth'
+
+        # Fix 8: Multiple colors → Asymmetry
+        if 'multiple colors' in refined.get('color', '').lower():
+            sym = refined.get('symmetry', '').lower()
+            if 'symmetrical' in sym and 'asymmetric' not in sym:
+                refined['symmetry'] = 'asymmetrical'
+
+        
         # Convert back to string
         template = (
             "The color is {color}, the shape is {shape}, the border is {border}, "
