@@ -65,17 +65,7 @@ def csv_path(cfg, dataset, split=None):
     return RESULTS_DIR / name
 PAPER_BACC = {"PH2": 78.07, "Derm7pt": 78.56, "HAM10000": 76.00}
 
-# ── filename builder ───────────────────────────────────────────────────────────
-def csv_path(cfg, dataset, split=None):
-    llm     = cfg["llm"]
-    refiner = cfg["refiner"]
-    suffix = (f"gt_concepts_False_raw_values_False"
-              f"_model_extractor_Explicd_n_demos_0_refiner_{refiner}")
-    if split is not None:
-        name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
-    else:
-        name = f"{dataset}_{llm}_diagnostic_report_validation_{suffix}.csv"
-    return RESULTS_DIR / name
+
 
 # ── metrics ────────────────────────────────────────────────────────────────────
 def compute_metrics(path):
