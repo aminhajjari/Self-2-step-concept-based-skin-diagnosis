@@ -50,11 +50,12 @@ class ConceptConsistencyRules:
                     "Atypical patterns need asymmetry (not symmetrical)"
                 )
 
+      
         # Rule 5: Irregular shape + Symmetric → contradiction
-        if 'irregular' in concepts_dict.get('shape', '').lower():
+        shape = concepts_dict.get('shape', '').lower()
+        if shape.strip() == 'irregular':  # exact match, not 'round to irregular'
             if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
                 if 'asymmetric' not in concepts_dict.get('symmetry', '').lower():
-                    
                     violations.append(
                         "Irregular shape typically means asymmetry (not symmetrical)"
                     )
@@ -113,8 +114,9 @@ class SimpleRuleBasedRefiner:
             if 'symmetrical' in refined.get('symmetry', '').lower():
                 refined['symmetry'] = 'asymmetrical'
 
+        
         # Fix 5: Irregular shape → Asymmetry
-        if 'irregular' in refined.get('shape', '').lower():
+        if refined.get('shape', '').lower().strip() == 'irregular':  # exact match
             sym = refined.get('symmetry', '').lower()
             if 'symmetrical' in sym and 'asymmetric' not in sym:
                 refined['symmetry'] = 'asymmetrical'
