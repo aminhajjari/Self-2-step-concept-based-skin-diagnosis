@@ -50,6 +50,37 @@ class ConceptConsistencyRules:
                     "Atypical patterns need asymmetry (not symmetrical)"
                 )
 
+        # Rule 5: Irregular shape + Symmetric → contradiction
+        if 'irregular' in concepts_dict.get('shape', '').lower():
+            if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
+                if 'asymmetric' not in concepts_dict.get('symmetry', '').lower():
+                    
+                    violations.append(
+                        "Irregular shape typically means asymmetry (not symmetrical)"
+                    )
+
+        # Rule 6: Atypical patterns + Regular border → contradiction
+        if 'atypical' in concepts_dict.get('dermoscopic patterns', '').lower():
+            if 'sharp' in concepts_dict.get('border', '').lower():
+                violations.append(
+                    "Atypical patterns conflict with sharp/well-defined border"
+                )
+
+        # Rule 7: Flat elevation + Ulcerated texture → contradiction  
+        if 'flat' in concepts_dict.get('elevation', '').lower():
+            if 'ulcerated' in concepts_dict.get('texture', '').lower():
+                violations.append(
+                "Flat elevation conflicts with ulcerated texture"
+                )
+
+        # Rule 8: Multiple colors + Symmetrical → contradiction
+        if 'multiple colors' in concepts_dict.get('color', '').lower():
+            if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
+                if 'asymmetric' not in concepts_dict.get('symmetry', '').lower():
+                    violations.append(
+                    "Multiple colors typically indicate asymmetrical lesions"
+                    )
+     
         return violations
 
 
