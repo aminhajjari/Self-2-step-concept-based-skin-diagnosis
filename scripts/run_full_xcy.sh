@@ -230,7 +230,91 @@ for dataset in Derm7pt HAM10000; do
 
     echo "✓ $dataset done"
 done
+# ══════════════════════════════════════════════════════════════════════════════
+# FEW-SHOT EXPERIMENTS — all 6 configs x n_shots in {1, 2, 4, 8}
+# Concepts already generated in zero-shot phase — reuse them (no --generate_concepts)
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+echo "══════════  FEW-SHOT EXPERIMENTS — ALL 6 CONFIGS  ══════════"
 
+for n_shots in 1 2 4 8; do
+    echo ""
+    echo "══════════  n_shots = $n_shots  ══════════"
+
+    # ── PH2 ──────────────────────────────────────────────────────────────────
+    echo "--- PH2: Config A (Rule + MMed) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner rule
+    done
+
+    echo "--- PH2: Config B (Rule + Mistral) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MMED_CKPT \
+                  --classifier_ckpt $MISTRAL_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner rule
+    done
+
+    echo "--- PH2: Config C (Mistral + Mistral) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner mistral
+    done
+
+    echo "--- PH2: Config D (Mistral + MMed) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MISTRAL_CKPT \
+                  --classifier_ckpt $MMED_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner mistral
+    done
+
+    echo "--- PH2: Config E (MMed + MMed) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner mmed
+    done
+
+    echo "--- PH2: Config F (MMed + Mistral) ${n_shots}-shot ---"
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MMED_CKPT \
+                  --classifier_ckpt $MISTRAL_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner mmed
+    done
+
+    # ── Derm7pt and HAM10000 ──────────────────────────────────────────────────
+    for dataset in Derm7pt HAM10000; do
+        echo "--- $dataset: Config A (Rule + MMed) ${n_shots}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner rule
+
+        echo "--- $dataset: Config B (Rule + Mistral) ${n_shots}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MMED_CKPT \
+                  --classifier_ckpt $MISTRAL_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --
 # ── final comparison table ─────────────────────────────────────────────────────
 echo ""
 echo "══════════  FINAL COMPARISON TABLES  ══════════"
