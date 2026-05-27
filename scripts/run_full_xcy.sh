@@ -71,7 +71,8 @@ for refiner in rule mistral mmed; do
     for split in 0 1 2 3 4; do
         run_stage --dataset PH2 --split $split \
                   --model Explicd --concept_extractor Explicd \
-                  --generate_concepts --data_path $DATA_PATH \
+                  --generate_concepts --predict_for_train_set \
+                  --data_path $DATA_PATH \
                   --refiner $refiner
     done
 done
@@ -82,7 +83,8 @@ for dataset in Derm7pt HAM10000; do
     for refiner in rule mistral mmed; do
         run_stage --dataset $dataset \
                   --model Explicd --concept_extractor Explicd \
-                  --generate_concepts --data_path $DATA_PATH \
+                  --generate_concepts --predict_for_train_set \
+                  --data_path $DATA_PATH \
                   --refiner $refiner
     done
 done
