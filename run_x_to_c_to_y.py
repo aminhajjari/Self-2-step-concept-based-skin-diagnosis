@@ -544,47 +544,48 @@ if __name__ == "__main__":
     print(f"# Date         : {get_current_date()}")
     print("#"*80)
 
+    classifier_ckpt = args.classifier_ckpt if args.classifier_ckpt else args.ckpt
+
     # ====================== STEP 1: Generate Concepts (X → C) ======================
     if args.generate_concepts:
-        # TODO: Make sure this function name is correct (x_to_c or the first c_to_y)
-        x_to_c(model_name=args.model, 
-               dataset=args.dataset,
-               concept_reference_dict=args.concept_reference_dict,
-               split=args.split, 
-               raw_values=args.raw_values,
-               predict_for_train_set=args.predict_for_train_set, 
-               data_path=args.data_path, 
-               refiner_name=args.refiner)
+        x_to_c(
+            model_name=args.model,
+            dataset=args.dataset,
+            concept_reference_dict=args.concept_reference_dict,
+            split=args.split,
+            raw_values=args.raw_values,
+            predict_for_train_set=args.predict_for_train_set,
+            data_path=args.data_path,
+            refiner_name=args.refiner
+        )
 
-            
-    classifier_ckpt = args.classifier_ckpt if args.classifier_ckpt else args.ckpt
-            
-    # ====================== STEP 2: Concept to Label (C → Y) ======================
+    # ====================== STEP 2 + 3: Classify and Evaluate ======================
     else:
-                            
-                
-            c_to_y(model_name=args.llm, 
-                       dataset=args.dataset, 
-                       ckpt=classifier_ckpt, 
-                       split=args.split,
-                       raw_values=args.raw_values, 
-                       concept_extractor=args.concept_extractor,
-                       report_path=args.report_path, 
-                       use_demos=args.use_demos, 
-                       n_demos=args.n_demos,
-                       ground_truth_concepts=args.gt_concepts, 
-                       refiner_name=args.refiner)
+        c_to_y(
+            model_name=args.llm,
+            dataset=args.dataset,
+            ckpt=classifier_ckpt,
+            split=args.split,
+            raw_values=args.raw_values,
+            concept_extractor=args.concept_extractor,
+            report_path=args.report_path,
+            use_demos=args.use_demos,
+            n_demos=args.n_demos,
+            ground_truth_concepts=args.gt_concepts,
+            refiner_name=args.refiner
+        )
 
-    # ====================== STEP 3: Evaluate ======================
-                classification(model_name=args.llm, 
-                               dataset=args.dataset, 
-                               ckpt=classifier_ckpt, 
-                               split=args.split,
-                               ground_truth_concepts=args.gt_concepts, 
-                               raw_values=args.raw_values,
-                               concept_extractor=args.concept_extractor, 
-                               n_demos=args.n_demos,
-                               refiner_name=args.refiner)
+        classification(
+            model_name=args.llm,
+            dataset=args.dataset,
+            ckpt=classifier_ckpt,
+            split=args.split,
+            ground_truth_concepts=args.gt_concepts,
+            raw_values=args.raw_values,
+            concept_extractor=args.concept_extractor,
+            n_demos=args.n_demos,
+            refiner_name=args.refiner
+        )
 
     print("\n" + "#"*80)
     print(f"# Status: Finished Successfully!")
