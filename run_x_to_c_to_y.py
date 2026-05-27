@@ -418,10 +418,10 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             # Iterate over retrieved demo_ids and save the respective report into a list
             for id in demos_ids:
                 sample = df_reports_train[df_reports_train.image_id == id].report.to_list()
-                #sample = df_reports_gt[df_reports_gt.image_id == id].report.to_list()
-                demos_to_use_in_prompt.append(sample[0])
-        else:
-            demos_to_use_in_prompt = None
+                if len(sample) > 0:
+                    demos_to_use_in_prompt.append(sample[0])
+                else:
+                    demos_to_use_in_prompt = None
     
         if concept_extractor != "Explicd":
             concepts = report[report.find("The presence"):report.find("are highly")-1]
