@@ -558,29 +558,33 @@ if __name__ == "__main__":
 
             
     classifier_ckpt = args.classifier_ckpt if args.classifier_ckpt else args.ckpt
+            
     # ====================== STEP 2: Concept to Label (C → Y) ======================
-    c_to_y(model_name=args.llm, 
-           dataset=args.dataset, 
-           ckpt=classifier_ckpt, 
-           split=args.split,
-           raw_values=args.raw_values, 
-           concept_extractor=args.concept_extractor,
-           report_path=args.report_path, 
-           use_demos=args.use_demos, 
-           n_demos=args.n_demos,
-           ground_truth_concepts=args.gt_concepts, 
-           refiner_name=args.refiner)
+    else:
+                            
+                
+            c_to_y(model_name=args.llm, 
+                       dataset=args.dataset, 
+                       ckpt=classifier_ckpt, 
+                       split=args.split,
+                       raw_values=args.raw_values, 
+                       concept_extractor=args.concept_extractor,
+                       report_path=args.report_path, 
+                       use_demos=args.use_demos, 
+                       n_demos=args.n_demos,
+                       ground_truth_concepts=args.gt_concepts, 
+                       refiner_name=args.refiner)
 
     # ====================== STEP 3: Evaluate ======================
-    classification(model_name=args.llm, 
-                   dataset=args.dataset, 
-                   ckpt=classifier_ckpt, 
-                   split=args.split,
-                   ground_truth_concepts=args.gt_concepts, 
-                   raw_values=args.raw_values,
-                   concept_extractor=args.concept_extractor, 
-                   n_demos=args.n_demos,
-                   refiner_name=args.refiner)
+                classification(model_name=args.llm, 
+                               dataset=args.dataset, 
+                               ckpt=classifier_ckpt, 
+                               split=args.split,
+                               ground_truth_concepts=args.gt_concepts, 
+                               raw_values=args.raw_values,
+                               concept_extractor=args.concept_extractor, 
+                               n_demos=args.n_demos,
+                               refiner_name=args.refiner)
 
     print("\n" + "#"*80)
     print(f"# Status: Finished Successfully!")
