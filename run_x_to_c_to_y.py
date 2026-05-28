@@ -363,7 +363,17 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         D7_TRAIN = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_train.csv")
         df_reports_test = df_reports.loc[df_reports.image_id.isin(D7_TEST.images.to_list())]
         df_reports_train = df_reports.loc[df_reports.image_id.isin(D7_TRAIN.images.to_list())]
-        df_reports_gt = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt_dermatology_reports_explicd_ontology.csv") if use_demos else None
+        if use_demos:
+           gt_path = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt_dermatology_reports_explicd_ontology.csv"
+           if os.path.exists(gt_path):
+               df_reports_gt = pd.read_csv(gt_path)
+           else:
+               print("WARNING: Derm7pt GT reports file not found, disabling demos.")
+               df_reports_gt = None
+               use_demos = False
+        else:
+            df_reports_gt = None
+    #    
     elif dataset == 'HAM10000':
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
@@ -375,7 +385,18 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         HAM_VAL = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_val.csv")
         df_reports_test = df_reports.loc[df_reports.image_id.isin(HAM_TEST.image_id.to_list())]
         df_reports_train = pd.concat([df_reports.loc[df_reports.image_id.isin(HAM_TRAIN.image_id.to_list())], df_reports.loc[df_reports.image_id.isin(HAM_VAL.image_id.to_list())]])
-        df_reports_gt = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000_dermatology_reports_explicd_ontology.csv") if use_demos else None
+        if use_demos:
+            gt_path = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000_dermatology_reports_explicd_ontology.csv"
+            if os.path.exists(gt_path):
+                df_reports_gt = pd.read_csv(gt_path)
+            else:
+                 print("WARNING: HAM10000 GT reports file not found, disabling demos.")
+                 df_reports_gt = None
+                 use_demos = False
+         else:
+             df_reports_gt = None    
+
+    #
     else:
         raise ValueError(f"The dataset {dataset} is not implemented.")
 
