@@ -364,15 +364,15 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         df_reports_test = df_reports.loc[df_reports.image_id.isin(D7_TEST.images.to_list())]
         df_reports_train = df_reports.loc[df_reports.image_id.isin(D7_TRAIN.images.to_list())]
         if use_demos:
-           gt_path = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt_dermatology_reports_explicd_ontology.csv"
-           if os.path.exists(gt_path):
-               df_reports_gt = pd.read_csv(gt_path)
-           else:
-               print("WARNING: Derm7pt GT reports file not found, disabling demos.")
-               df_reports_gt = None
-               use_demos = False
-        else:
-            df_reports_gt = None
+            gt_path = f"results/concept_prediction/Derm7pt_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv"
+            if os.path.exists(gt_path):
+                df_reports_gt = pd.read_csv(gt_path)
+            else:
+                 print(f"WARNING: Derm7pt GT reports file not found at {gt_path}, disabling demos.")
+                 df_reports_gt = None
+                 use_demos = False
+         else:
+             df_reports_gt = None
     #    
     elif dataset == 'HAM10000':
         if report_path is not None:
@@ -386,15 +386,15 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         df_reports_test = df_reports.loc[df_reports.image_id.isin(HAM_TEST.image_id.to_list())]
         df_reports_train = pd.concat([df_reports.loc[df_reports.image_id.isin(HAM_TRAIN.image_id.to_list())], df_reports.loc[df_reports.image_id.isin(HAM_VAL.image_id.to_list())]])
         if use_demos:
-            gt_path = "/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000_dermatology_reports_explicd_ontology.csv"
+            gt_path = f"results/concept_prediction/HAM10000_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv"
             if os.path.exists(gt_path):
                 df_reports_gt = pd.read_csv(gt_path)
             else:
-                 print("WARNING: HAM10000 GT reports file not found, disabling demos.")
+                 print(f"WARNING: HAM10000 GT reports file not found at {gt_path}, disabling demos.")
                  df_reports_gt = None
                  use_demos = False
          else:
-             df_reports_gt = None    
+             df_reports_gt = None  
 
     #
     else:
