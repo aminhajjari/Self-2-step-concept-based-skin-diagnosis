@@ -368,11 +368,11 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             if os.path.exists(gt_path):
                 df_reports_gt = pd.read_csv(gt_path)
             else:
-                 print(f"WARNING: Derm7pt GT reports file not found at {gt_path}, disabling demos.")
-                 df_reports_gt = None
-                 use_demos = False
-         else:
-             df_reports_gt = None
+                print(f"WARNING: Derm7pt GT reports file not found at {gt_path}, disabling demos.")
+                df_reports_gt = None
+                use_demos = False
+        else:
+            df_reports_gt = None
     #    
     elif dataset == 'HAM10000':
         if report_path is not None:
@@ -390,11 +390,11 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             if os.path.exists(gt_path):
                 df_reports_gt = pd.read_csv(gt_path)
             else:
-                 print(f"WARNING: HAM10000 GT reports file not found at {gt_path}, disabling demos.")
-                 df_reports_gt = None
-                 use_demos = False
-         else:
-             df_reports_gt = None  
+                print(f"WARNING: HAM10000 GT reports file not found at {gt_path}, disabling demos.")
+                df_reports_gt = None
+                use_demos = False
+        else:
+            df_reports_gt = None 
 
     #
     else:
