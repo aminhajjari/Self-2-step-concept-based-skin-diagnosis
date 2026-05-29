@@ -437,12 +437,19 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             demos_ids = rices.get_context_keys(key=img_id, n=n_demos)
             demos_to_use_in_prompt = []
             # Iterate over retrieved demo_ids and save the respective report into a list
+            clean_demos = []
             for id in demos_ids:
                 sample = df_reports_train[df_reports_train.image_id == id].report.to_list()
                 if len(sample) > 0:
-                    demos_to_use_in_prompt.append(sample[0])
-                else:
-                    demos_to_use_in_prompt = None
+                    report = sample[0]
+                    # Only use demos with clinically consistent concepts
+                    if count_violations(report) == 0:
+                        clean_demos.append(report)
+                # Stop once we have enough clean demos
+                if len(clean_demos) >= n_demos:
+                    break
+
+            demos_to_use_in_prompt = clean_demos if clean_demos else None
     
         if concept_extractor != "Explicd":
             concepts = report[report.find("The presence"):report.find("are highly")-1]
