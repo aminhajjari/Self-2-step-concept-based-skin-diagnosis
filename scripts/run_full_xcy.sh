@@ -63,10 +63,12 @@ run_stage() {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STEP 1: GENERATE CONCEPTS (once per refiner — reused for all shot settings)
+# STEP 1: GENERATE CONCEPTS
 # ══════════════════════════════════════════════════════════════════════════════
+
 echo ""
 echo "══════════  PH2 — generating concepts  ══════════"
+
 for refiner in rule mistral mmed; do
     for split in 0 1 2 3 4; do
         run_stage --dataset PH2 --split $split \
@@ -79,6 +81,7 @@ done
 
 echo ""
 echo "══════════  Derm7pt + HAM10000 — generating concepts  ══════════"
+
 for dataset in Derm7pt HAM10000; do
     for refiner in rule mistral mmed; do
         run_stage --dataset $dataset \
@@ -91,24 +94,26 @@ done
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 2: ZERO-SHOT + FEW-SHOT CLASSIFICATION
-# Loop over all n_shots (0 = zero-shot, 1/2/4/8 = few-shot)
 # ══════════════════════════════════════════════════════════════════════════════
+
 for n_shots in 0 1 2 4 8; do
+
     echo ""
     echo "══════════  n_shots = $n_shots — ALL 6 CONFIGS  ══════════"
 
     if [ $n_shots -eq 0 ]; then
         DEMOS_FLAG=""
-        HAM_DEMOS=$n_shots
+        HAM_DEMOS=0
     elif [ $n_shots -gt 2 ]; then
         DEMOS_FLAG="--use_demos"
-        HAM_DEMOS=2   # cap HAM10000 at 2-shot max
+        HAM_DEMOS=2
     else
         DEMOS_FLAG="--use_demos"
         HAM_DEMOS=$n_shots
     fi
 
-    # ── PH2 ──────────────────────────────────────────────────────────────────
+    # ── PH2 ──────────────────────────────────────────────────────────────
+
     echo "--- PH2: Config A (Rule + MMed) ${n_shots}-shot ---"
     for split in 0 1 2 3 4; do
         run_stage --dataset PH2 --split $split \
@@ -166,8 +171,10 @@ for n_shots in 0 1 2 4 8; do
                   --refiner mmed
     done
 
-    # ── Derm7pt and HAM10000 ─────────────────────────────────────────────────
-    for dataset in Derm7pt HAM10000; do
+    # ── Derm7pt ──────────────────────────────────────────────────────────
+
+    for dataset in Derm7pt; do
+
         echo "--- $dataset: Config A (Rule + MMed) ${n_shots}-shot ---"
         run_stage --dataset $dataset \
                   --concept_extractor Explicd \
@@ -216,122 +223,116 @@ for n_shots in 0 1 2 4 8; do
         echo "✓ $dataset ${n_shots}-shot done"
     done
 
-done   # closes: for n_shots
+    # ── HAM10000 (capped at 2-shot) ─────────────────────────────────────
 
+    for dataset in HAM10000; do
+
+        echo "--- $dataset: Config A (Rule + MMed) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner rule
+
+        echo "--- $dataset: Config B (Rule + Mistral) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MMED_CKPT \
+                  --classifier_ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner rule
+
+        echo "--- $dataset: Config C (Mistral + Mistral) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner mistral
+
+        echo "--- $dataset: Config D (Mistral + MMed) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MISTRAL_CKPT \
+                  --classifier_ckpt $MMED_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner mistral
+
+        echo "--- $dataset: Config E (MMed + MMed) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner mmed
+
+        echo "--- $dataset: Config F (MMed + Mistral) ${HAM_DEMOS}-shot ---"
+        run_stage --dataset $dataset \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MMED_CKPT \
+                  --classifier_ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $HAM_DEMOS \
+                  --refiner mmed
+
+        echo "✓ $dataset ${HAM_DEMOS}-shot done"
+    done
+
+done
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STEP 2b: ABLATION — Rule-refined concepts → all LLMs (best concept quality)
-# This tests whether cleaner concepts help MMed close the gap vs Mistral
+# STEP 2b: ABLATION
 # ══════════════════════════════════════════════════════════════════════════════
+
 echo ""
 echo "══════════  ABLATION: Rule concepts → MMed & Mistral  ══════════"
 
 RULE_CONCEPT_FILE_D7="results/concept_prediction/Derm7pt_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
 RULE_CONCEPT_FILE_HAM="results/concept_prediction/HAM10000_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
 
-# ── Derm7pt ──────────────────────────────────────────────────────────────
-for dataset in Derm7pt; do
-    echo "--- $dataset: Config A (Rule + MMed) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
+for n_shots in 0 1 2; do
+
+    if [ $n_shots -eq 0 ]; then
+        DEMOS_FLAG=""
+    else
+        DEMOS_FLAG="--use_demos"
+    fi
+
+    # Derm7pt → MMed
+    run_stage --dataset Derm7pt \
               --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_D7 \
               --llm MMed --ckpt $MMED_CKPT \
               $DEMOS_FLAG --n_demos $n_shots \
               --refiner rule
 
-    echo "--- $dataset: Config B (Rule + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
+    # Derm7pt → Mistral
+    run_stage --dataset Derm7pt \
               --concept_extractor Explicd \
-              --llm Mistral --ckpt $MMED_CKPT \
-              --classifier_ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner rule
-
-    echo "--- $dataset: Config C (Mistral + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_D7 \
               --llm Mistral --ckpt $MISTRAL_CKPT \
               $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mistral
-
-    echo "--- $dataset: Config D (Mistral + MMed) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MISTRAL_CKPT \
-              --classifier_ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mistral
-
-    echo "--- $dataset: Config E (MMed + MMed) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mmed
-
-    echo "--- $dataset: Config F (MMed + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MMED_CKPT \
-              --classifier_ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mmed
-
-    echo "✓ $dataset ${n_shots}-shot done"
-done
-
-
-# ── HAM10000 (capped at 2-shot) ─────────────────────────────────────────
-for dataset in HAM10000; do
-    echo "--- $dataset: Config A (Rule + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
               --refiner rule
 
-    echo "--- $dataset: Config B (Rule + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
+    # HAM10000 → MMed
+    run_stage --dataset HAM10000 \
               --concept_extractor Explicd \
-              --llm Mistral --ckpt $MMED_CKPT \
-              --classifier_ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
+              --report_path $RULE_CONCEPT_FILE_HAM \
+              --llm MMed --ckpt $MMED_CKPT \
+              $DEMOS_FLAG --n_demos $n_shots \
               --refiner rule
 
-    echo "--- $dataset: Config C (Mistral + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
+    # HAM10000 → Mistral
+    run_stage --dataset HAM10000 \
               --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_HAM \
               --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mistral
+              $DEMOS_FLAG --n_demos $n_shots \
+              --refiner rule
 
-    echo "--- $dataset: Config D (Mistral + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MISTRAL_CKPT \
-              --classifier_ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mistral
-
-    echo "--- $dataset: Config E (MMed + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mmed
-
-    echo "--- $dataset: Config F (MMed + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset $dataset \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MMED_CKPT \
-              --classifier_ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mmed
-
-    echo "✓ $dataset ${HAM_DEMOS}-shot done"
 done
+
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 3: PRINT FINAL TABLES
 # ══════════════════════════════════════════════════════════════════════════════
+
 echo ""
 echo "══════════  ZERO-SHOT COMPARISON TABLE  ══════════"
 python evaluate_results.py
