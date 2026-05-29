@@ -17,11 +17,11 @@ from sklearn.metrics import balanced_accuracy_score, recall_score, confusion_mat
 RESULTS_DIR = Path("results/label_prediction")
 N_SPLITS    = 5
 
-# The 6 configs to compare
+# The 3 configs to compare
 CONFIGS = [
     {
         "label"  : "ExpLICD+Rule+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
+        "llm"    : "MMed-Llama-3-8B-EnIns",
         "refiner": "rule",
     },
     {
@@ -36,12 +36,12 @@ CONFIGS = [
     },
     {
         "label"  : "ExpLICD+Mistral+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
+        "llm"    : "MMed-Llama-3-8B-EnIns",
         "refiner": "mistral",
     },
     {
         "label"  : "ExpLICD+MMed+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
+        "llm"    : "MMed-Llama-3-8B-EnIns",
         "refiner": "mmed",
     },
     {
@@ -114,7 +114,7 @@ def print_comparison_table(dataset, rows):
 # ── main ───────────────────────────────────────────────────────────────────────
 def main():
     print("\n" + "="*78)
-    print("  SELF-REFINE COMPARISON  —  6 Configs  x  3 Datasets")
+    print("  SELF-REFINE COMPARISON  —  3 Configs  x  3 Datasets")
     print("="*78)
 
     for dataset in ["PH2", "Derm7pt", "HAM10000"]:
