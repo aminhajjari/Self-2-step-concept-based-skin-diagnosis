@@ -99,8 +99,13 @@ for n_shots in 0 1 2 4 8; do
 
     if [ $n_shots -eq 0 ]; then
         DEMOS_FLAG=""
+        HAM_DEMOS=$n_shots
+    elif [ $n_shots -gt 2 ]; then
+        DEMOS_FLAG="--use_demos"
+        HAM_DEMOS=2   # cap HAM10000 at 2-shot max
     else
         DEMOS_FLAG="--use_demos"
+        HAM_DEMOS=$n_shots
     fi
 
     # ── PH2 ──────────────────────────────────────────────────────────────────
