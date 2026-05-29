@@ -73,6 +73,19 @@ concept_reference_dict_HAM10000 = {
     "melanoma simulator": ["Benign skin condition analyzer"],
 }
 
+def count_violations(report_str: str) -> int:
+    from src.self_refiner.concept_refiner import ConceptConsistencyRules
+    import re
+    rules = ConceptConsistencyRules()
+    concepts_dict = {}
+    keys = ['color', 'shape', 'border', 'dermoscopic patterns',
+            'texture', 'symmetry', 'elevation']
+    for key in keys:
+        pattern = rf"(?:the\s+)?{re.escape(key)}\s+(?:is|are)\s+([^,\.]+)"
+        match = re.search(pattern, report_str, re.IGNORECASE)
+        if match:
+            concepts_dict[key] = match.group(1).strip()
+    return len(rules.check_consistency(concepts_dict))
 
 def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
