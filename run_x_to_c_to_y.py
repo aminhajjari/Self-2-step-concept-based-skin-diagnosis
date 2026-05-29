@@ -73,6 +73,15 @@ concept_reference_dict_HAM10000 = {
     "melanoma simulator": ["Benign skin condition analyzer"],
 }
 
+
+def normalize_concepts_for_mmed(concepts_str: str, model_name: str) -> str:
+    if model_name != "MMed":
+        return concepts_str
+    if "Thus the diagnosis is" in concepts_str:
+        concepts_str = concepts_str[:concepts_str.find("Thus the diagnosis is")-1]
+    return concepts_str.strip().rstrip('.')
+
+
 def count_violations(report_str: str) -> int:
     from src.self_refiner.concept_refiner import ConceptConsistencyRules
     import re
