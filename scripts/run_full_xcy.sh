@@ -218,6 +218,57 @@ for n_shots in 0 1 2 4 8; do
 
 done   # closes: for n_shots
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 2b: ABLATION — Rule-refined concepts → all LLMs (best concept quality)
+# This tests whether cleaner concepts help MMed close the gap vs Mistral
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+echo "══════════  ABLATION: Rule concepts → MMed & Mistral  ══════════"
+
+RULE_CONCEPT_FILE_D7="results/concept_prediction/Derm7pt_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
+RULE_CONCEPT_FILE_HAM="results/concept_prediction/HAM10000_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
+
+for n_shots in 0 1 2; do
+    if [ $n_shots -eq 0 ]; then
+        DEMOS_FLAG=""
+    else
+        DEMOS_FLAG="--use_demos"
+    fi
+
+    # Derm7pt: rule concepts → MMed classifier
+    run_stage --dataset Derm7pt \
+              --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_D7 \
+              --llm MMed --ckpt $MMED_CKPT \
+              $DEMOS_FLAG --n_demos $n_shots \
+              --refiner rule
+
+    # Derm7pt: rule concepts → Mistral classifier
+    run_stage --dataset Derm7pt \
+              --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_D7 \
+              --llm Mistral --ckpt $MISTRAL_CKPT \
+              $DEMOS_FLAG --n_demos $n_shots \
+              --refiner rule
+
+    # HAM10000: same, capped at 2-shot
+    run_stage --dataset HAM10000 \
+              --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_HAM \
+              --llm MMed --ckpt $MMED_CKPT \
+              $DEMOS_FLAG --n_demos $n_shots \
+              --refiner rule
+
+    run_stage --dataset HAM10000 \
+              --concept_extractor Explicd \
+              --report_path $RULE_CONCEPT_FILE_HAM \
+              --llm Mistral --ckpt $MISTRAL_CKPT \
+              $DEMOS_FLAG --n_demos $n_shots \
+              --refiner rule
+done
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 3: PRINT FINAL TABLES
 # ══════════════════════════════════════════════════════════════════════════════
