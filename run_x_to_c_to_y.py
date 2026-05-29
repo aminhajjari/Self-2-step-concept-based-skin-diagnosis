@@ -479,6 +479,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             gt_response = report[len("The lesion is diagnosed as "):report.find(". The")]
         else:
             concepts = report[:report.find("Thus the diagnosis is")-1]
+            concepts = normalize_concepts_for_mmed(concepts, model_name)
             input_query = query.format(concepts)
             gt_response = report[report.find("Thus the diagnosis is ")+len("Thus the diagnosis is "):-1]
         
