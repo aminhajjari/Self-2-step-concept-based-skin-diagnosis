@@ -99,7 +99,7 @@ def main():
             row += f"   (best Δ vs paper: {delta(best_bacc, paper) if best_bacc > 0 else 'N/A':>6}%)"
             print(row)
 
-        print(f"  {'Paper baseline':<20}" + f"  {paper:>8.2f}" * len(N_SHOTS))
+        print(f"  {'Paper baseline':<20}" + f"  {paper:>8.2f}" * len(shots))
         print(f"{'='*110}")
 
     # Also print full detail per config
