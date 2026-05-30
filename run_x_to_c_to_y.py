@@ -449,14 +449,23 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
 
     # Demonstrations
     if use_demos:
-        rices = RICES(dataset=dataset, split=split, valid_ids=[]) # feature_extractor="explicd",
+        if random_demos:
+            import random as rnd
+            all_train_ids = df_reports_train.image_id.to_list()
+        else:
+            rices = RICES(dataset=dataset, split=split, valid_ids=[]) # feature_extractor="explicd",
     demos_to_use_in_prompt = None
     for img_id, report in tqdm(zip(df_reports_test.image_id.to_list(), df_reports_test.report.to_list())):
 
         # Demonstrations
         if use_demos:
-            # Get most similar N image ids to the query image
-            demos_ids = rices.get_context_keys(key=img_id, n=n_demos)
+            if random_demos:
+            # Random selection instead of similarity-based
+            candidate_ids = rnd.sample(all_train_ids, 
+                                    min(n_demos * 10, len(all_train_ids)))
+            demos_ids = candidate_ids
+            else:
+                demos_ids = rices.get_context_keys(key=img_id, n=n_demos * 5)
             demos_to_use_in_prompt = []
             # Iterate over retrieved demo_ids and save the respective report into a list
             clean_demos = []
@@ -630,7 +639,8 @@ if __name__ == "__main__":
             use_demos=args.use_demos,
             n_demos=args.n_demos,
             ground_truth_concepts=args.gt_concepts,
-            refiner_name=args.refiner
+            refiner_name=args.refiner,
+            random_demos=args.random_demos
         )
 
         classification(
