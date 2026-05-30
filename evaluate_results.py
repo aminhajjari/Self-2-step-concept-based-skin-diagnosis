@@ -57,7 +57,7 @@ def csv_path(cfg, dataset, split=None):
     llm     = cfg["llm"]
     refiner = cfg["refiner"]
     suffix  = (f"raw_values_False_gt_concepts_False"
-               f"_model_extractor_Explicd_n_demos_0_refiner_{refiner}")
+               f"_model_extractor_Explicd_n_demos_{n_demos}_refiner_{refiner}_retrieval_rices")
     if split is not None:
         name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
     else:
