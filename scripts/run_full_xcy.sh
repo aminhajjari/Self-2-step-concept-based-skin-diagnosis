@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=xcy_fullexp
 #SBATCH --account=def-arashmoh
-#SBATCH --time=72:00:00
+#SBATCH --time=120:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:h100:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --gres=gpu:h100:2
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
 
