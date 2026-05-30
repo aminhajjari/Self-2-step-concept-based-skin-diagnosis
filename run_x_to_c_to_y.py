@@ -6,7 +6,7 @@ import argparse
 import os
 import gc
 import torch
-
+import random as rnd
 #from src.models.MONET import MONET 
 #from src.models.CLIP import CLIPViTB16
 #from src.models.BiomedCLIP import BiomedCLIP
@@ -450,7 +450,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     # Demonstrations
     if use_demos:
         if random_demos:
-            import random as rnd
+            
             all_train_ids = df_reports_train.image_id.to_list()
         else:
             rices = RICES(dataset=dataset, split=split, valid_ids=[]) # feature_extractor="explicd",
@@ -460,10 +460,10 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         # Demonstrations
         if use_demos:
             if random_demos:
-            # Random selection instead of similarity-based
-            candidate_ids = rnd.sample(all_train_ids, 
-                                    min(n_demos * 10, len(all_train_ids)))
-            demos_ids = candidate_ids
+                # Random selection instead of similarity-based
+                candidate_ids = rnd.sample(all_train_ids,
+                                           min(n_demos * 10, len(all_train_ids)))
+                demos_ids = candidate_ids
             else:
                 demos_ids = rices.get_context_keys(key=img_id, n=n_demos * 5)
             demos_to_use_in_prompt = []
