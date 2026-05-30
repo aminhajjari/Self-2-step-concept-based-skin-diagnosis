@@ -335,9 +335,9 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
     pre_df = pd.DataFrame.from_dict(dict_to_save_data, orient='index', columns=['Column 2']).reset_index()
     pre_df.columns = ["image_id", "report"]
     if split is None:
-        file_path = f"results/concept_prediction/{dataset}_dermatology_reports_generated_by_{model_name}_raw_values_{raw_values}.csv"
+            file_path = f"results/concept_prediction/{dataset}_dermatology_reports_generated_by_{model_name}_refiner_{refiner_name}_raw_values_{raw_values}.csv"
     else:
-        file_path = f"results/concept_prediction/{dataset}_split_{split}_dermatology_reports_generated_by_{model_name}_raw_values_{raw_values}.csv"
+            file_path = f"results/concept_prediction/{dataset}_split_{split}_dermatology_reports_generated_by_{model_name}_refiner_{refiner_name}_raw_values_{raw_values}.csv"
 
     # Extract the directory path from the file path
     dir_path = os.path.dirname(file_path)
