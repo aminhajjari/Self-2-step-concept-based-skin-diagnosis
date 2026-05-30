@@ -587,6 +587,7 @@ if __name__ == "__main__":
     parser.add_argument('--generate_concepts', action="store_true")
     parser.add_argument('--data_path', type=str, default='data')
     parser.add_argument('--refiner', type=str, default='mmed', choices=['mmed', 'mistral', 'rule'])
+    parser.add_argument('--random_demos', action="store_true", help='Use random demo selection instead of RICES')
 
     args = parser.parse_args()
     seed_everything(seed=42)
