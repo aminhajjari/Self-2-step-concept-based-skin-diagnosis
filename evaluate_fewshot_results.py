@@ -75,7 +75,8 @@ def main():
         print(f"{'='*110}")
 
         # Header
-        shots_header = "".join(f"  {n:>5}-shot" for n in N_SHOTS)
+        shots = [0, 1, 2] if dataset == "HAM10000" else N_SHOTS
+        shots_header = "".join(f"  {n:>5}-shot" for n in shots)
         print(f"  {'Config':<20}{shots_header}")
         print(f"  {'(BAcc %)':<20}" + "  " + "-"*90)
 
