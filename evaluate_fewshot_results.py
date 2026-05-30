@@ -82,6 +82,7 @@ def main():
         for cfg in CONFIGS:
             row = f"  {cfg['label']:<20}"
             best_bacc = 0
+            shots = [0, 1, 2] if dataset == "HAM10000" else N_SHOTS
             for n in N_SHOTS:
                 if dataset == "PH2":
                     m = avg_ph2(cfg, n)
@@ -114,6 +115,7 @@ def main():
         print(f"  {'-'*60}")
 
         for cfg in CONFIGS:
+            shots = [0, 1, 2] if dataset == "HAM10000" else N_SHOTS
             for n in N_SHOTS:
                 if dataset == "PH2":
                     m = avg_ph2(cfg, n)
