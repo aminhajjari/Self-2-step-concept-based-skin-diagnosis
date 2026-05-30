@@ -368,7 +368,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:  
-            df_reports = pd.read_csv(f"results/concept_prediction/PH2_split_{split}_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/PH2_split_{split}_dermatology_reports_generated_by_{concept_extractor}_refiner_{refiner_name}_raw_values_{raw_values}.csv")
         
         PH2_TEST = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_test_split_{split}.csv")
         PH2_TRAIN = pd.read_csv(f"/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/PH2/splits/PH2_train_split_{split}.csv")
@@ -379,7 +379,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:
-            df_reports = pd.read_csv(f"results/concept_prediction/Derm7pt_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/Derm7pt_dermatology_reports_generated_by_{concept_extractor}_refiner_{refiner_name}_raw_values_{raw_values}.csv")
         
         D7_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_test.csv")
         D7_TRAIN = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/Derm7pt/splits/derm7pt_train.csv")
@@ -400,7 +400,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         if report_path is not None:
             df_reports = pd.read_csv(report_path) 
         else:
-            df_reports = pd.read_csv(f"results/concept_prediction/HAM10000_dermatology_reports_generated_by_{concept_extractor}_raw_values_{raw_values}.csv")
+            df_reports = pd.read_csv(f"results/concept_prediction/HAM10000_dermatology_reports_generated_by_{concept_extractor}_refiner_{refiner_name}_raw_values_{raw_values}.csv")
 
         HAM_TEST = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_test.csv")
         HAM_TRAIN = pd.read_csv("/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/data/HAM10000/splits/HAM10000_train.csv")
