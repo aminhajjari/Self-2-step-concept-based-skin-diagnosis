@@ -539,18 +539,19 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     print(f"Results saved to {file_path}")
 
 
-def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed'):
+def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
 
+    retrieval_tag = "random" if random_demos else "rices"
     if model_name == "MMed":
         if split != None:
-            file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}.csv"
+            file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
-            file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}.csv"
+            file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
     elif model_name in ["Mistral", "GPT"]:
         if split != None:
-            file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}.csv"
+            file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
-            file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}.csv"
+            file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
     else:
         raise ValueError("File not found!")
     df_responses = pd.read_csv(file_path)
@@ -653,7 +654,8 @@ if __name__ == "__main__":
             raw_values=args.raw_values,
             concept_extractor=args.concept_extractor,
             n_demos=args.n_demos,
-            refiner_name=args.refiner
+            refiner_name=args.refiner, 
+            random_demos=args.random_demos 
         )
 
     print("\n" + "#"*80)
