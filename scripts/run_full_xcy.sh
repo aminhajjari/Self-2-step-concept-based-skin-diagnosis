@@ -284,8 +284,8 @@ done
 echo ""
 echo "══════════  ABLATION: Rule concepts → MMed & Mistral  ══════════"
 
-RULE_CONCEPT_FILE_D7="results/concept_prediction/Derm7pt_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
-RULE_CONCEPT_FILE_HAM="results/concept_prediction/HAM10000_dermatology_reports_generated_by_Explicd_raw_values_False.csv"
+RULE_CONCEPT_FILE_D7="results/concept_prediction/Derm7pt_dermatology_reports_generated_by_Explicd_refiner_rule_raw_values_False.csv"
+RULE_CONCEPT_FILE_HAM="results/concept_prediction/HAM10000_dermatology_reports_generated_by_Explicd_refiner_rule_raw_values_False.csv"
 
 for n_shots in 0 1 2; do
 
