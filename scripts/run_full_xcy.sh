@@ -329,6 +329,42 @@ for n_shots in 0 1 2; do
 
 done
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STEP 2c: RANDOM DEMO BASELINE (1-shot and 2-shot only)
+# ══════════════════════════════════════════════════════════════════════════════
+
+echo ""
+echo "══════════  RANDOM DEMO BASELINE  ══════════"
+
+for n_shots in 1 2; do
+
+    # PH2
+    for split in 0 1 2 3 4; do
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  --use_demos --n_demos $n_shots \
+                  --refiner rule --random_demos
+    done
+
+    # Derm7pt
+    run_stage --dataset Derm7pt \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MMED_CKPT \
+              --use_demos --n_demos $n_shots \
+              --refiner rule --random_demos
+
+    # HAM10000
+    run_stage --dataset HAM10000 \
+              --concept_extractor Explicd \
+              --llm MMed --ckpt $MMED_CKPT \
+              --use_demos --n_demos $n_shots \
+              --refiner rule --random_demos
+
+    echo "✓ Random baseline ${n_shots}-shot done"
+done
+
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 3: PRINT FINAL TABLES
 # ══════════════════════════════════════════════════════════════════════════════
