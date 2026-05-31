@@ -387,3 +387,8 @@ echo "========================================="
 echo ""
 echo "══════════  REFINEMENT ANALYSIS TABLE  ══════════"
 python analyze_refinement.py
+
+
+echo ""
+echo "══════════  STATISTICAL SIGNIFICANCE TESTS  ══════════"
+python mcnemar_test.py
