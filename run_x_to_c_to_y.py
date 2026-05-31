@@ -363,6 +363,29 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
     pre_df.to_csv(file_path, index=False)
     print(f"Saved to {file_path}")
 
+    # ── save refinement statistics CSV ────────────────────────────────────────
+    if dict_refinement_stats and model_name == "Explicd":
+        stats_df = pd.DataFrame.from_dict(
+            dict_refinement_stats, orient='index'
+        ).reset_index()
+        stats_df.columns = [
+            'image_id', 'initial_violations', 'final_violations',
+            'converged', 'iterations'
+        ]
+        if split is None:
+            stats_path = (
+                f"results/concept_prediction/{dataset}_refinement_stats"
+                f"_{model_name}_refiner_{refiner_name}.csv"
+            )
+        else:
+            stats_path = (
+                f"results/concept_prediction/{dataset}_split_{split}"
+                f"_refinement_stats_{model_name}_refiner_{refiner_name}.csv"
+            )
+        stats_df.to_csv(stats_path, index=False)
+        print(f"Refinement stats saved to {stats_path}")
+    # ─────────────────────────────────────────────────────────────────────────
+
     # free GPU memory
     del model
     del test_dataloader
