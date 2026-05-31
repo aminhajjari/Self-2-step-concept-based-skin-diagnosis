@@ -382,3 +382,8 @@ echo "========================================="
 echo "  PIPELINE FINISHED"
 echo "  Finished: $(date)"
 echo "========================================="
+
+
+echo ""
+echo "══════════  REFINEMENT ANALYSIS TABLE  ══════════"
+python analyze_refinement.py
