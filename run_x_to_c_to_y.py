@@ -198,7 +198,14 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
                  use_self_refine=True,
                  llm_refiner=mmed_refiner
             )
-
+                    
+            # ── save refinement stats for this image ──────────────────────
+            dict_refinement_stats[img_ids[0]] = {
+                'initial_violations': refinement_info['initial_violations'],
+                'final_violations':   refinement_info['final_violations'],
+                'converged':          refinement_info['converged'],
+                'iterations':         refinement_info['iterations']
+            }
 
         if not raw_values:
             if model_name == "MONET":
@@ -280,6 +287,13 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
                      use_self_refine=True,
                      llm_refiner=mmed_refiner
                 )
+                 # ── save refinement stats for this train image ────────────
+                 dict_refinement_stats[img_ids[0]] = {
+                    'initial_violations': refinement_info['initial_violations'],
+                    'final_violations':   refinement_info['final_violations'],
+                    'converged':          refinement_info['converged'],
+                    'iterations':         refinement_info['iterations']
+                }
 
             if not raw_values:
                 if model_name == "MONET":
