@@ -22,9 +22,9 @@ except ImportError:
 RESULTS_DIR = Path("results/label_prediction")
 N_SPLITS = 5
 
-def load_predictions(dataset, llm, refiner, n_demos=0, split=None):
-    suffix = (f"raw_values_False_gt_concepts_False"
-              f"_model_extractor_Explicd_n_demos_{n_demos}_refiner_{refiner}_retrieval_rices")
+def load_predictions(dataset, llm, refiner, n_demos=0, split=None, retrieval="rices"):
+     suffix = (f"raw_values_False_gt_concepts_False"
+               f"_model_extractor_Explicd_n_demos_{n_demos}_refiner_{refiner}_retrieval_{retrieval}")
     if split is not None:
         name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
     else:
@@ -67,11 +67,10 @@ def run_mcnemar(df_a, df_b, label_a, label_b):
         'test_type': 'exact' if exact else 'chi2'
     }
 
-def avg_ph2_predictions(llm, refiner, n_demos=0):
-    """Combine all 5 PH2 splits into one dataframe."""
+def avg_ph2_predictions(llm, refiner, n_demos=0, retrieval="rices"):
     dfs = []
     for split in range(N_SPLITS):
-        df = load_predictions("PH2", llm, refiner, n_demos, split)
+        df = load_predictions("PH2", llm, refiner, n_demos, split, retrieval=retrieval)
         if df is not None:
             dfs.append(df)
     if not dfs:
@@ -84,34 +83,31 @@ def main():
     print("="*85)
     
     COMPARISONS = [
-    # Compare best refiner vs rule (ablation of refiner choice)
-    ("Derm7pt", 0, "Rule+Mistral(0-shot)", "Mistral", "rule",
-                   "MMed+Mistral(0-shot)",  "Mistral", "mmed"),
-    ("Derm7pt", 1, "Rule+Mistral(1-shot)", "Mistral", "rule",
-                   "MMed+Mistral(1-shot)",  "Mistral", "mmed"),
-    ("HAM10000", 0, "MMed+MMed(0-shot)",   "MMed", "mmed",
-                    "Rule+MMed(0-shot)",    "MMed", "rule"),
-    ("HAM10000", 1, "MMed+MMed(1-shot)",   "MMed", "mmed",
-                    "Rule+MMed(1-shot)",    "MMed", "rule"),
-    # RICES vs Random demo selection
-    ("Derm7pt", 1, "RICES+MMed(1-shot)",   "MMed", "rule",
-                   "Random+MMed(1-shot)",   "MMed", "rule"),  # need random files
-    ]
+    ("Derm7pt", 0, "Rule+Mistral(0-shot)", "Mistral", "rule", "rices",
+                   "MMed+Mistral(0-shot)",  "Mistral", "mmed", "rices"),
+    ("Derm7pt", 1, "Rule+Mistral(1-shot)", "Mistral", "rule", "rices",
+                   "MMed+Mistral(1-shot)",  "Mistral", "mmed", "rices"),
+    ("HAM10000", 0, "MMed+MMed(0-shot)",   "MMed", "mmed", "rices",
+                    "Rule+MMed(0-shot)",    "MMed", "rule", "rices"),
+    ("HAM10000", 1, "MMed+MMed(1-shot)",   "MMed", "mmed", "rices",
+                    "Rule+MMed(1-shot)",    "MMed", "rule", "rices"),
+    ("Derm7pt", 1, "RICES+MMed(1-shot)",   "MMed", "rule", "rices",
+                   "Random+MMed(1-shot)",   "MMed", "rule", "random"),
+    ]  
     
     print(f"\n  {'Comparison':<45} {'Acc A':>6} {'Acc B':>6} "
           f"{'p-value':>9} {'Sig?':>6}")
     print("  " + "-"*75)
     
     all_results = []
-    for (dataset, n_shots, label_a, llm_a, ref_a, 
-                            label_b, llm_b, ref_b) in COMPARISONS:
-        
-        if dataset == "PH2":
-            df_a = avg_ph2_predictions(llm_a, ref_a, n_shots)
-            df_b = avg_ph2_predictions(llm_b, ref_b, n_shots)
-        else:
-            df_a = load_predictions(dataset, llm_a, ref_a, n_shots)
-            df_b = load_predictions(dataset, llm_b, ref_b, n_shots)
+    for (dataset, n_shots, label_a, llm_a, ref_a, ret_a,
+                        label_b, llm_b, ref_b, ret_b) in COMPARISONS:
+    if dataset == "PH2":
+        df_a = avg_ph2_predictions(llm_a, ref_a, n_shots, ret_a)
+        df_b = avg_ph2_predictions(llm_b, ref_b, n_shots, ret_b)
+    else:
+        df_a = load_predictions(dataset, llm_a, ref_a, n_shots, retrieval=ret_a)
+        df_b = load_predictions(dataset, llm_b, ref_b, n_shots, retrieval=ret_b)
         
         if df_a is None or df_b is None:
             print(f"  {label_a[:20]} vs {label_b[:20]}: MISSING FILES")
