@@ -84,27 +84,18 @@ def main():
     print("="*85)
     
     COMPARISONS = [
-        # (dataset, n_shots, label_a, llm_a, refiner_a, label_b, llm_b, refiner_b)
-        # Key comparison: best config vs no-refinement
-        ("Derm7pt", 0,
-         "Rule+Mistral(0-shot)", "Mistral", "rule",
-         "NoRefine+Mistral(0-shot)", "Mistral", "none"),
-        ("Derm7pt", 1,
-         "Rule+Mistral(1-shot)", "Mistral", "rule",
-         "NoRefine+Mistral(1-shot)", "Mistral", "none"),
-        ("HAM10000", 0,
-         "MMed+MMed(0-shot)", "MMed", "mmed",
-         "NoRefine+MMed(0-shot)", "MMed", "none"),
-        ("HAM10000", 1,
-         "MMed+MMed(1-shot)", "MMed", "mmed",
-         "NoRefine+MMed(1-shot)", "MMed", "none"),
-        # Compare refiners against each other
-        ("Derm7pt", 1,
-         "Rule+Mistral(1-shot)", "Mistral", "rule",
-         "MMed+Mistral(1-shot)", "Mistral", "mmed"),
-        ("Derm7pt", 1,
-         "Rule+MMed(1-shot)", "MMed", "rule",
-         "MMed+MMed(1-shot)", "MMed", "mmed"),
+    # Compare best refiner vs rule (ablation of refiner choice)
+    ("Derm7pt", 0, "Rule+Mistral(0-shot)", "Mistral", "rule",
+                   "MMed+Mistral(0-shot)",  "Mistral", "mmed"),
+    ("Derm7pt", 1, "Rule+Mistral(1-shot)", "Mistral", "rule",
+                   "MMed+Mistral(1-shot)",  "Mistral", "mmed"),
+    ("HAM10000", 0, "MMed+MMed(0-shot)",   "MMed", "mmed",
+                    "Rule+MMed(0-shot)",    "MMed", "rule"),
+    ("HAM10000", 1, "MMed+MMed(1-shot)",   "MMed", "mmed",
+                    "Rule+MMed(1-shot)",    "MMed", "rule"),
+    # RICES vs Random demo selection
+    ("Derm7pt", 1, "RICES+MMed(1-shot)",   "MMed", "rule",
+                   "Random+MMed(1-shot)",   "MMed", "rule"),  # need random files
     ]
     
     print(f"\n  {'Comparison':<45} {'Acc A':>6} {'Acc B':>6} "
