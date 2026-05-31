@@ -113,7 +113,8 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
     Returns:
         None: Save predicted concepts into a CSV file.
     """
-
+    # ── refinement statistics collector ──────────────────────────────────────
+    dict_refinement_stats = dict()
         # Set concept reference dictionary
     if concept_reference_dict == "PH2":          # Note: this variable comes from parameter
         concept_reference_dict = concept_reference_dict_PH2
