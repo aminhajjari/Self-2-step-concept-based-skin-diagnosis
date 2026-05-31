@@ -25,8 +25,8 @@ N_SPLITS = 5
 def load_predictions(dataset, llm, refiner, n_demos=0, split=None, retrieval="rices"):
      suffix = (f"raw_values_False_gt_concepts_False"
                f"_model_extractor_Explicd_n_demos_{n_demos}_refiner_{refiner}_retrieval_{retrieval}")
-    if split is not None:
-        name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
+     if split is not None:
+         name = f"{dataset}_split_{split}_{llm}_diagnostic_report_validation_{suffix}.csv"
     else:
         name = f"{dataset}_{llm}_diagnostic_report_validation_{suffix}.csv"
     path = RESULTS_DIR / name
@@ -101,17 +101,18 @@ def main():
     
     all_results = []
     for (dataset, n_shots, label_a, llm_a, ref_a, ret_a,
-                        label_b, llm_b, ref_b, ret_b) in COMPARISONS:
-    if dataset == "PH2":
-        df_a = avg_ph2_predictions(llm_a, ref_a, n_shots, ret_a)
-        df_b = avg_ph2_predictions(llm_b, ref_b, n_shots, ret_b)
-    else:
-        df_a = load_predictions(dataset, llm_a, ref_a, n_shots, retrieval=ret_a)
-        df_b = load_predictions(dataset, llm_b, ref_b, n_shots, retrieval=ret_b)
-        
+                           label_b, llm_b, ref_b, ret_b) in COMPARISONS:
+        if dataset == "PH2":
+            df_a = avg_ph2_predictions(llm_a, ref_a, n_shots, ret_a)
+            df_b = avg_ph2_predictions(llm_b, ref_b, n_shots, ret_b)
+        else:
+            df_a = load_predictions(dataset, llm_a, ref_a, n_shots, retrieval=ret_a)
+            df_b = load_predictions(dataset, llm_b, ref_b, n_shots, retrieval=ret_b)
+
         if df_a is None or df_b is None:
             print(f"  {label_a[:20]} vs {label_b[:20]}: MISSING FILES")
             continue
+        
         
         result = run_mcnemar(df_a, df_b, label_a, label_b)
         all_results.append(result)
