@@ -41,5 +41,7 @@ class Mistral:
             generated_ids, skip_special_tokens=True,
             clean_up_tokenization_spaces=True
         )[0]
-        mistral_response = decoded[len(prompt.replace("</s>", "")):].strip()
+        input_len = inputs.input_ids.shape[1]
+        new_tokens = generated_ids[0][input_len:]
+        mistral_response = self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
         return mistral_response
