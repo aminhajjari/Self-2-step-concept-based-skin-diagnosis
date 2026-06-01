@@ -163,8 +163,8 @@ def print_detailed_table():
 def print_rices_vs_random_table():
     """
     For each dataset × config × n_shots in [1, 2]:
-      BAcc(RICES) | BAcc(Random) | Δ(RICES−Random) | Sens(RICES) | Sens(Random) | Spec(RICES) | Spec(Random)
-    Only configs/shots where at least one retrieval method produced a file are shown.
+      BAcc(RICES) | BAcc(Random) | Δ(RICES−Random) | Sens | Spec
+    Only configs/shots where at least one retrieval method has a file are shown.
     """
     SHOTS_TO_COMPARE = [1, 2]
 
@@ -206,30 +206,42 @@ def print_rices_vs_random_table():
                 label = cfg['label'] if first_row else ""
                 first_row = False
 
-                if mn is None and mr is None:
+                # Case: only RICES exists, random was never run
+                if mn is None:
+                    print(
+                        f"  {label:<20}  {n:>4}  "
+                        f"{pct(mr['bacc']):>11}  {'NOT RUN':>9}  {'N/A':>9}  "
+                        f"{pct(mr['sens']):>11}  {'N/A':>9}  "
+                        f"{pct(mr['spec']):>11}  {'N/A':>9}  {'N/A':>8}"
+                    )
                     continue
-                if mn is None:  
-                    # only RICES exists — note it but don't compare
-                    print(f"  {label:<20}  {n:>4}  {pct(mr['bacc']):>11}  {'NOT RUN':>9}  {'N/A':>9}  "
-                          f"{pct(mr['sens']):>11}  {'N/A':>9}  "
-                          f"{pct(mr['spec']):>11}  {'N/A':>9}  {'N/A':>8}")
-                    continue
-                sens_r   = pct(mr['sens'])   if mr else "MISSING"
-                sens_n   = pct(mn['sens'])   if mn else "MISSING"
-                spec_r   = pct(mr['spec'])   if mr else "MISSING"
-                spec_n   = pct(mn['spec'])   if mn else "MISSING"
-                d_str    = delta_ab(mr, mn)
 
-                # Determine winner
-                if mr is not None and mn is not None:
-                    if mr['bacc'] > mn['bacc'] + 0.1:
-                        winner = "RICES ▲"
-                    elif mn['bacc'] > mr['bacc'] + 0.1:
-                        winner = "Random ▲"
-                    else:
-                        winner = "  tie  "
+                # Case: only Random exists (unusual but handle it)
+                if mr is None:
+                    print(
+                        f"  {label:<20}  {n:>4}  "
+                        f"{'NOT RUN':>11}  {pct(mn['bacc']):>9}  {'N/A':>9}  "
+                        f"{'N/A':>11}  {pct(mn['sens']):>9}  "
+                        f"{'N/A':>11}  {pct(mn['spec']):>9}  {'N/A':>8}"
+                    )
+                    continue
+
+                # Both exist — full comparison
+                # FIX: assign bacc_r and bacc_n BEFORE using them
+                bacc_r = pct(mr['bacc'])
+                bacc_n = pct(mn['bacc'])
+                sens_r = pct(mr['sens'])
+                sens_n = pct(mn['sens'])
+                spec_r = pct(mr['spec'])
+                spec_n = pct(mn['spec'])
+                d_str  = delta_ab(mr, mn)
+
+                if mr['bacc'] > mn['bacc'] + 0.1:
+                    winner = "RICES ▲"
+                elif mn['bacc'] > mr['bacc'] + 0.1:
+                    winner = "Random ▲"
                 else:
-                    winner = "  N/A  "
+                    winner = "  tie  "
 
                 print(
                     f"  {label:<20}  {n:>4}  "
@@ -238,12 +250,13 @@ def print_rices_vs_random_table():
                     f"{spec_r:>11}  {spec_n:>9}  "
                     f"{winner:>8}"
                 )
+
             if not first_row:
                 print()  # blank line between configs
 
         if not any_row_printed:
-            print(f"  *** No random-retrieval result files found for {dataset}. ***")
-            print(f"  *** Run the pipeline with --random_demos to generate them.  ***")
+            print(f"  *** No result files found for {dataset}. ***")
+            print(f"  *** Run the pipeline with --random_demos to generate random baselines. ***")
 
         print(sep)
 
