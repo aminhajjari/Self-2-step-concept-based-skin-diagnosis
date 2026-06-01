@@ -206,8 +206,14 @@ def print_rices_vs_random_table():
                 label = cfg['label'] if first_row else ""
                 first_row = False
 
-                bacc_r   = pct(mr['bacc'])   if mr else "MISSING"
-                bacc_n   = pct(mn['bacc'])   if mn else "MISSING"
+                if mn is None and mr is None:
+                    continue
+                if mn is None:  
+                    # only RICES exists — note it but don't compare
+                    print(f"  {label:<20}  {n:>4}  {pct(mr['bacc']):>11}  {'NOT RUN':>9}  {'N/A':>9}  "
+                          f"{pct(mr['sens']):>11}  {'N/A':>9}  "
+                          f"{pct(mr['spec']):>11}  {'N/A':>9}  {'N/A':>8}")
+                    continue
                 sens_r   = pct(mr['sens'])   if mr else "MISSING"
                 sens_n   = pct(mn['sens'])   if mn else "MISSING"
                 spec_r   = pct(mr['spec'])   if mr else "MISSING"
