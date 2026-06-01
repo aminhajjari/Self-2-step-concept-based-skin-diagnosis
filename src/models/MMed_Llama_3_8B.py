@@ -85,6 +85,10 @@ class MMedLlama3:
 
         output_str = self.tokenizer.batch_decode(topk_output)  # a list containing just one str
 
-        return output_str[0][self.get_length_of_prompt(prompt):]
+        # get_length_of_prompt counts characters, but tokenization != characters
+        # Decode only the *newly generated* tokens instead
+        input_len = model_inputs.input_ids.shape[1]
+        new_tokens = topk_output[0][input_len:]
+        return self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
 
