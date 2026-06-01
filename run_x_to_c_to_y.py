@@ -541,7 +541,22 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             llm_response = map_letter_to_label(model.inference_text(instruction=instruction, query=input_query, max_new_tokens=1).strip())
         else:
             prompt = model.get_prompt(instruction, input_query, demos=demos_to_use_in_prompt)
-            llm_response = map_letter_to_label(model.predict(prompt, max_new_tokens=1).strip())
+            raw_output = model.predict(prompt, max_new_tokens=10).strip()
+            print(f"[DEBUG] img={img_id} | raw_output={repr(raw_output)}")
+            # Try to find A or B anywhere in the output
+            import re as _re
+            match = _re.search(r'\b([AB])\b', raw_output)
+            if match:
+                llm_response = map_letter_to_label(match.group(1))
+            else:
+                # fallback: check if melanoma/nevus mentioned directly
+                if 'melanoma' in raw_output.lower():
+                    llm_response = 'melanoma'
+                elif 'nevus' in raw_output.lower():
+                    llm_response = 'nevus'
+                else:
+                    llm_response = map_letter_to_label(raw_output[:1])
+            
             
         dict_responses['image_id'].append(img_id)
         dict_responses['gt_response'].append(gt_response)
