@@ -334,19 +334,82 @@ done
 # STEP 2c: RANDOM DEMO BASELINE (1-shot and 2-shot only)
 # ══════════════════════════════════════════════════════════════════════════════
 
-echo ""
-echo "══════════  RANDOM DEMO BASELINE  ══════════"
+echo "══════════  RANDOM DEMO BASELINE — ALL 6 CONFIGS  ══════════"
 
 for n_shots in 1 2; do
 
-    # PH2
+    if [ $n_shots -eq 0 ]; then
+        DEMOS_FLAG=""
+    else
+        DEMOS_FLAG="--use_demos"
+    fi
+
+    # ── PH2 ──────────────────────────────────────────────────────────
     for split in 0 1 2 3 4; do
+
         run_stage --dataset PH2 --split $split \
                   --concept_extractor Explicd \
                   --llm MMed --ckpt $MMED_CKPT \
-                  --use_demos --n_demos $n_shots \
+                  $DEMOS_FLAG --n_demos $n_shots \
                   --refiner rule --random_demos
+
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner rule --random_demos
+
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner mistral --random_demos
+
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner mistral --random_demos
+
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm MMed --ckpt $MMED_CKPT \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner mmed --random_demos
+
+        run_stage --dataset PH2 --split $split \
+                  --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner mmed --random_demos
     done
+
+    # ── Derm7pt ──────────────────────────────────────────────────────
+    for refiner_llm in "rule MMed $MMED_CKPT" "rule Mistral $MISTRAL_CKPT" \
+                       "mistral Mistral $MISTRAL_CKPT" "mistral MMed $MMED_CKPT" \
+                       "mmed MMed $MMED_CKPT" "mmed Mistral $MISTRAL_CKPT"; do
+        read refiner llm ckpt <<< $refiner_llm
+        run_stage --dataset Derm7pt \
+                  --concept_extractor Explicd \
+                  --llm $llm --ckpt $ckpt \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner $refiner --random_demos
+    done
+
+    # ── HAM10000 ─────────────────────────────────────────────────────
+    for refiner_llm in "rule MMed $MMED_CKPT" "rule Mistral $MISTRAL_CKPT" \
+                       "mistral Mistral $MISTRAL_CKPT" "mistral MMed $MMED_CKPT" \
+                       "mmed MMed $MMED_CKPT" "mmed Mistral $MISTRAL_CKPT"; do
+        read refiner llm ckpt <<< $refiner_llm
+        run_stage --dataset HAM10000 \
+                  --concept_extractor Explicd \
+                  --llm $llm --ckpt $ckpt \
+                  $DEMOS_FLAG --n_demos $n_shots \
+                  --refiner $refiner --random_demos
+    done
+
+    echo "✓ Random baseline ${n_shots}-shot done"
+done
 
     # Derm7pt
     run_stage --dataset Derm7pt \
