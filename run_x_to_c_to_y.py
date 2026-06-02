@@ -6,6 +6,7 @@ import argparse
 import os
 import gc
 import torch
+from itertools import zip_longest, chain
 import random as rnd
 #from src.models.MONET import MONET 
 #from src.models.CLIP import CLIPViTB16
@@ -556,7 +557,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             nevus_demos    = clean_demos_by_class['nevus'][:per_class]
             melanoma_demos = clean_demos_by_class['melanoma'][:per_class]
             # zip interleaves; chain picks up any leftover from the longer list
-            from itertools import zip_longest, chain
+            
             interleaved = [d for pair in zip_longest(nevus_demos, melanoma_demos)
                            for d in pair if d is not None]
             demos_to_use_in_prompt = interleaved if interleaved else None
