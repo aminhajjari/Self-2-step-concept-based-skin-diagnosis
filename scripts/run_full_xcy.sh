@@ -32,6 +32,9 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export HF_HOME=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/hf_cache
 export HF_HUB_CACHE=$HF_HOME
 
+# Suppress Python warnings and debug prints from libraries
+export PYTHONWARNINGS="ignore"
+
 PROJECT_PATH="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis"
 DATA_PATH="$PROJECT_PATH/data"
 OUTPUT_BASE="/home/gkianfar/scratch/Amin/concept/outputs"
@@ -50,12 +53,16 @@ ln -s $OUTPUT_BASE/results results
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
+# ── run_stage: suppress all verbose output, only errors go to .err ──────────
+# stdout (model loading, tqdm, DEBUG lines) → /dev/null
+# stderr (real errors) → stays in .err via SLURM naturally
 run_stage() {
-    echo ">>> python run_x_to_c_to_y.py $@"
-    python run_x_to_c_to_y.py "$@"
+    echo ">>> $(date '+%H:%M:%S') python run_x_to_c_to_y.py $@"
+    python run_x_to_c_to_y.py "$@" \
+        2>/dev/null 1>/dev/null   # suppress ALL verbose output per stage
     EXIT_CODE=$?
     if [ $EXIT_CODE -ne 0 ]; then
-        echo "ERROR: failed with exit code $EXIT_CODE"
+        echo "ERROR: stage failed with exit code $EXIT_CODE — args: $@" >&2
         exit $EXIT_CODE
     fi
     python -c "import torch; torch.cuda.empty_cache()" 2>/dev/null || true
@@ -67,7 +74,7 @@ run_stage() {
 # ══════════════════════════════════════════════════════════════════════════════
 
 echo ""
-echo "══════════  PH2 — generating concepts  ══════════"
+echo "══════════  STEP 1: Generating Concepts (x→c)  ══════════"
 
 for refiner in rule mistral mmed; do
     for split in 0 1 2 3 4; do
@@ -77,10 +84,8 @@ for refiner in rule mistral mmed; do
                   --data_path $DATA_PATH \
                   --refiner $refiner
     done
+    echo "  PH2 refiner=$refiner done"
 done
-
-echo ""
-echo "══════════  Derm7pt + HAM10000 — generating concepts  ══════════"
 
 for dataset in Derm7pt HAM10000; do
     for refiner in rule mistral mmed; do
@@ -89,17 +94,23 @@ for dataset in Derm7pt HAM10000; do
                   --generate_concepts --predict_for_train_set \
                   --data_path $DATA_PATH \
                   --refiner $refiner
+        echo "  $dataset refiner=$refiner done"
     done
 done
+
+echo "✓ STEP 1 complete"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 2: ZERO-SHOT + FEW-SHOT CLASSIFICATION  (c → y)  — ALL 6 CONFIGS
 # ══════════════════════════════════════════════════════════════════════════════
 
+echo ""
+echo "══════════  STEP 2: Classification (c→y) — All 6 Configs  ══════════"
+
 for n_shots in 0 1 2 4 8; do
 
     echo ""
-    echo "══════════  n_shots = $n_shots — ALL 6 CONFIGS  ══════════"
+    echo "  ── n_shots=$n_shots ──"
 
     if [ $n_shots -eq 0 ]; then
         DEMOS_FLAG=""
@@ -113,173 +124,69 @@ for n_shots in 0 1 2 4 8; do
     fi
 
     # ── PH2 ──────────────────────────────────────────────────────────────
-
-    echo "--- PH2: Config A (Rule + MMed) ${n_shots}-shot ---"
     for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm MMed --ckpt $MMED_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner rule
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner rule
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mistral
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm MMed    --ckpt $MMED_CKPT    --classifier_ckpt $MMED_CKPT \
+                                                      $DEMOS_FLAG --n_demos $n_shots --refiner mistral
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner mmed
+        run_stage --dataset PH2 --split $split --concept_extractor Explicd \
+                  --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mmed
     done
-
-    echo "--- PH2: Config B (Rule + Mistral) ${n_shots}-shot ---"
-    for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm Mistral --ckpt $MISTRAL_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner rule
-    done
-
-    echo "--- PH2: Config C (Mistral + Mistral) ${n_shots}-shot ---"
-    for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm Mistral --ckpt $MISTRAL_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner mistral
-    done
-
-    echo "--- PH2: Config D (Mistral + MMed) ${n_shots}-shot ---"
-    for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm MMed --ckpt $MMED_CKPT \
-                  --classifier_ckpt $MMED_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner mistral
-    done
-
-    echo "--- PH2: Config E (MMed + MMed) ${n_shots}-shot ---"
-    for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm MMed --ckpt $MMED_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner mmed
-    done
-
-    echo "--- PH2: Config F (MMed + Mistral) ${n_shots}-shot ---"
-    for split in 0 1 2 3 4; do
-        run_stage --dataset PH2 --split $split \
-                  --concept_extractor Explicd \
-                  --llm Mistral --ckpt $MISTRAL_CKPT \
-                  $DEMOS_FLAG --n_demos $n_shots \
-                  --refiner mmed
-    done
+    echo "  PH2 ${n_shots}-shot done"
 
     # ── Derm7pt ──────────────────────────────────────────────────────────
-
-    echo "--- Derm7pt: Config A (Rule + MMed) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner rule
-
-    echo "--- Derm7pt: Config B (Rule + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner rule
-
-    echo "--- Derm7pt: Config C (Mistral + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mistral
-
-    echo "--- Derm7pt: Config D (Mistral + MMed) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mistral
-
-    echo "--- Derm7pt: Config E (MMed + MMed) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mmed
-
-    echo "--- Derm7pt: Config F (MMed + Mistral) ${n_shots}-shot ---"
-    run_stage --dataset Derm7pt \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $n_shots \
-              --refiner mmed
-
-    echo "✓ Derm7pt ${n_shots}-shot done"
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner rule
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mistral
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner mistral
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner mmed
+    run_stage --dataset Derm7pt --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mmed
+    echo "  Derm7pt ${n_shots}-shot done"
 
     # ── HAM10000 (capped at 2-shot) ───────────────────────────────────
-
-    echo "--- HAM10000: Config A (Rule + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner rule
-
-    echo "--- HAM10000: Config B (Rule + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner rule
-
-    echo "--- HAM10000: Config C (Mistral + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mistral
-
-    echo "--- HAM10000: Config D (Mistral + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mistral
-
-    echo "--- HAM10000: Config E (MMed + MMed) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm MMed --ckpt $MMED_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mmed
-
-    echo "--- HAM10000: Config F (MMed + Mistral) ${HAM_DEMOS}-shot ---"
-    run_stage --dataset HAM10000 \
-              --concept_extractor Explicd \
-              --llm Mistral --ckpt $MISTRAL_CKPT \
-              $DEMOS_FLAG --n_demos $HAM_DEMOS \
-              --refiner mmed
-
-    echo "✓ HAM10000 ${HAM_DEMOS}-shot done"
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner rule
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner rule
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner mistral
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner mistral
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner mmed
+    run_stage --dataset HAM10000 --concept_extractor Explicd \
+              --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $HAM_DEMOS --refiner mmed
+    echo "  HAM10000 ${HAM_DEMOS}-shot done"
 
 done
+
+echo "✓ STEP 2 complete"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 2b: ABLATION  (Rule-refined concepts → each LLM)
 # ══════════════════════════════════════════════════════════════════════════════
 
 echo ""
-echo "══════════  ABLATION: Rule concepts → MMed & Mistral  ══════════"
+echo "══════════  STEP 2b: Ablation — Rule concepts → each LLM  ══════════"
 
 RULE_D7="results/concept_prediction/Derm7pt_dermatology_reports_generated_by_Explicd_refiner_rule_raw_values_False.csv"
 RULE_HAM="results/concept_prediction/HAM10000_dermatology_reports_generated_by_Explicd_refiner_rule_raw_values_False.csv"
 
 for n_shots in 0 1 2; do
-
-    if [ $n_shots -eq 0 ]; then
-        DEMOS_FLAG=""
-    else
-        DEMOS_FLAG="--use_demos"
-    fi
+    if [ $n_shots -eq 0 ]; then DEMOS_FLAG=""; else DEMOS_FLAG="--use_demos"; fi
 
     run_stage --dataset Derm7pt  --concept_extractor Explicd --report_path $RULE_D7  \
               --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule
@@ -289,21 +196,21 @@ for n_shots in 0 1 2; do
               --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule
     run_stage --dataset HAM10000 --concept_extractor Explicd --report_path $RULE_HAM \
               --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner rule
-
+    echo "  Ablation ${n_shots}-shot done"
 done
+
+echo "✓ STEP 2b complete"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 2c: RANDOM DEMO BASELINE — ALL 6 CONFIGS (1-shot and 2-shot only)
 # ══════════════════════════════════════════════════════════════════════════════
 
 echo ""
-echo "══════════  RANDOM DEMO BASELINE — ALL 6 CONFIGS  ══════════"
+echo "══════════  STEP 2c: Random Demo Baseline  ══════════"
 
 for n_shots in 1 2; do
-
     DEMOS_FLAG="--use_demos"
 
-    # ── PH2 ──────────────────────────────────────────────────────────
     for split in 0 1 2 3 4; do
         run_stage --dataset PH2 --split $split --concept_extractor Explicd \
                   --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule    --random_demos
@@ -319,7 +226,6 @@ for n_shots in 1 2; do
                   --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mmed    --random_demos
     done
 
-    # ── Derm7pt ──────────────────────────────────────────────────────
     run_stage --dataset Derm7pt --concept_extractor Explicd \
               --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule    --random_demos
     run_stage --dataset Derm7pt --concept_extractor Explicd \
@@ -333,7 +239,6 @@ for n_shots in 1 2; do
     run_stage --dataset Derm7pt --concept_extractor Explicd \
               --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mmed    --random_demos
 
-    # ── HAM10000 ─────────────────────────────────────────────────────
     run_stage --dataset HAM10000 --concept_extractor Explicd \
               --llm MMed    --ckpt $MMED_CKPT    $DEMOS_FLAG --n_demos $n_shots --refiner rule    --random_demos
     run_stage --dataset HAM10000 --concept_extractor Explicd \
@@ -347,12 +252,19 @@ for n_shots in 1 2; do
     run_stage --dataset HAM10000 --concept_extractor Explicd \
               --llm Mistral --ckpt $MISTRAL_CKPT $DEMOS_FLAG --n_demos $n_shots --refiner mmed    --random_demos
 
-    echo "✓ Random baseline ${n_shots}-shot done"
+    echo "  Random baseline ${n_shots}-shot done"
 done
 
+echo "✓ STEP 2c complete"
+
 # ══════════════════════════════════════════════════════════════════════════════
-# STEP 3: PRINT FINAL TABLES
+# STEP 3: PRINT FINAL TABLES  (these go to .out — clean, no noise)
 # ══════════════════════════════════════════════════════════════════════════════
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  STEP 3: RESULTS TABLES"
+echo "════════════════════════════════════════════════════════════"
 
 echo ""
 echo "══════════  ZERO-SHOT COMPARISON TABLE  ══════════"
