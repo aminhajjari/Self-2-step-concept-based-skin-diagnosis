@@ -505,27 +505,47 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             else:
                 demos_ids = rices.get_context_keys(key=img_id, n=n_demos * 5)
             demos_to_use_in_prompt = []
-            # Iterate over retrieved demo_ids and save the respective report into a list
-            clean_demos = []
+            # ── Balanced class demo selection ────────────────────────────
+            # Collect clean demos separately per class, then interleave
+            # so the LLM sees equal evidence for nevus and melanoma.
+            clean_demos_by_class = {'nevus': [], 'melanoma': []}
             for id in demos_ids:
                 sample = df_reports_train[df_reports_train.image_id == id].report.to_list()
-                if len(sample) > 0:
-                    demo_report = sample[0]
-                    if "Thus the diagnosis is" in demo_report:
-                        demo_concepts_only = demo_report[:demo_report.find("Thus the diagnosis is")-1].strip()
-                    else:
-                        continue  # skip if label marker not found — never risk leaking
-        
-                    # Hard safety: skip if any label word survived stripping
-                    if 'nevus' in demo_concepts_only.lower() or 'melanoma' in demo_concepts_only.lower():
-                        continue
-        
-                    if count_violations(demo_concepts_only) == 0:
-                        clean_demos.append(demo_concepts_only)
-                if len(clean_demos) >= n_demos:
+                if len(sample) == 0:
+                    continue
+                demo_report = sample[0]
+                if "Thus the diagnosis is" not in demo_report:
+                    continue  # skip if label marker not found
+
+                label_start = demo_report.find("Thus the diagnosis is ") + len("Thus the diagnosis is ")
+                demo_label = demo_report[label_start:].strip().rstrip('.').lower()
+                demo_concepts_only = demo_report[:demo_report.find("Thus the diagnosis is")-1].strip()
+
+                # Hard safety: skip if any label word survived stripping
+                if 'nevus' in demo_concepts_only.lower() or 'melanoma' in demo_concepts_only.lower():
+                    continue
+
+                if demo_label not in clean_demos_by_class:
+                    continue
+
+                if count_violations(demo_concepts_only) == 0:
+                    clean_demos_by_class[demo_label].append(demo_concepts_only)
+
+                # Stop early once we have enough of both classes
+                per_class_needed = max(1, n_demos // 2)
+                if (len(clean_demos_by_class['nevus']) >= per_class_needed and
+                        len(clean_demos_by_class['melanoma']) >= per_class_needed):
                     break
 
-            demos_to_use_in_prompt = clean_demos if clean_demos else None
+            # Interleave nevus and melanoma demos (nevus first to avoid recency bias)
+            per_class = max(1, n_demos // 2)
+            nevus_demos    = clean_demos_by_class['nevus'][:per_class]
+            melanoma_demos = clean_demos_by_class['melanoma'][:per_class]
+            # zip interleaves; chain picks up any leftover from the longer list
+            from itertools import zip_longest, chain
+            interleaved = [d for pair in zip_longest(nevus_demos, melanoma_demos)
+                           for d in pair if d is not None]
+            demos_to_use_in_prompt = interleaved if interleaved else None
     
         if concept_extractor != "Explicd":
             concepts = report[report.find("The presence"):report.find("are highly")-1]
