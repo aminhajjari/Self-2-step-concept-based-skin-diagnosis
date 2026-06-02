@@ -511,16 +511,17 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                 sample = df_reports_train[df_reports_train.image_id == id].report.to_list()
                 if len(sample) > 0:
                     demo_report = sample[0]
-                    # Strip ground truth label from demo — prevent label leakage
                     if "Thus the diagnosis is" in demo_report:
                         demo_concepts_only = demo_report[:demo_report.find("Thus the diagnosis is")-1].strip()
                     else:
-                        demo_concepts_only = demo_report
+                        continue  # skip if label marker not found — never risk leaking
+        
+                    # Hard safety: skip if any label word survived stripping
+                    if 'nevus' in demo_concepts_only.lower() or 'melanoma' in demo_concepts_only.lower():
+                        continue
+        
                     if count_violations(demo_concepts_only) == 0:
                         clean_demos.append(demo_concepts_only)
-                if len(clean_demos) >= n_demos:
-                    break
-                # Stop once we have enough clean demos
                 if len(clean_demos) >= n_demos:
                     break
 
