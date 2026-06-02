@@ -567,10 +567,17 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             input_query = query.format(concepts)
             gt_response = report[len("The lesion is diagnosed as "):report.find(". The")]
         else:
-            concepts = report[:report.find("Thus the diagnosis is")-1]
-            concepts = normalize_concepts_for_mmed(concepts, model_name)
+            # ── strip label suffix for ALL models, not just MMed ──────────
+            # The report format is: "<concepts>. Thus the diagnosis is <label>."
+            # We must NEVER let the label leak into the query regardless of LLM.
+            diag_marker = "Thus the diagnosis is"
+            if diag_marker in report:
+                concepts = report[:report.find(diag_marker)-1].strip().rstrip('.')
+                gt_response = report[report.find(diag_marker+" ")+len(diag_marker+" "):-1].strip().rstrip('.')
+            else:
+                concepts = report.strip()
+                gt_response = "nevus"  # fallback, should never happen
             input_query = query.format(concepts)
-            gt_response = report[report.find("Thus the diagnosis is ")+len("Thus the diagnosis is "):-1]
         
         if model_name == "GPT": # TODO: maybe uniformize in the future
             """ GPT-4 """
