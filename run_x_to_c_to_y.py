@@ -484,15 +484,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     hint = """Consider the following examples:\n
     A skin lesion is a nevus when it has the majority of the following concepts: uniformly tan, brown, or black, round, sharp and well-defined, regular pigment network, symmetric dots and globules, smooth, symmetrical, raised with possible central ulceration.\n
     A skin lesion is a melanoma when it has the majority of the following concepts: highly variable, often with multiple colors (black, brown, red, white, blue), irregular, often blurry and irregular, atypical pigment network, irregular streaks, blue-whitish veil, irregular, a raised or ulcerated surface, asymmetrical, flat to raised.\n"""
-    query = (
-        "###Clinical Reasoning Guide:\n"
-        "- MELANOMA: multiple colors OR asymmetric OR atypical/irregular patterns OR blurry border → lean melanoma\n"
-        "- NEVUS: uniform color AND round/symmetric AND sharp border AND regular patterns → lean nevus\n"
-        "- Weight color variability and asymmetry most heavily.\n\n"
-        "###Question: What is the skin lesion diagnosis for these dermoscopic concepts: {}.\n"
-        "###Options: A. Nevus\nB. Melanoma.\n"
-        "###Answer (A or B only):"
-    )
+   query = """###Question: What is the type of skin lesion that is associated with the following dermoscopic concepts: {}. ###Options: A. Nevus\nB. Melanoma. ###Answer:"""
 
     # Demonstrations
     if use_demos:
