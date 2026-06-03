@@ -480,13 +480,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     }
 
     # Define instruction and query
-    instruction = (
-        "You are an expert dermatologist. "
-        "Analyze the dermoscopic concepts provided and select the correct diagnosis. "
-        "Apply clinical reasoning: asymmetry, color variability, and irregular patterns "
-        "are the strongest melanoma indicators. "
-        "Answer ONLY with the letter A or B, nothing else."
-    )
+    instruction = f"You're a english doctor, make a good choice based on the question and options. You need to answer the letter of the option without further explanations.")
     hint = """Consider the following examples:\n
     A skin lesion is a nevus when it has the majority of the following concepts: uniformly tan, brown, or black, round, sharp and well-defined, regular pigment network, symmetric dots and globules, smooth, symmetrical, raised with possible central ulceration.\n
     A skin lesion is a melanoma when it has the majority of the following concepts: highly variable, often with multiple colors (black, brown, red, white, blue), irregular, often blurry and irregular, atypical pigment network, irregular streaks, blue-whitish veil, irregular, a raised or ulcerated surface, asymmetrical, flat to raised.\n"""
