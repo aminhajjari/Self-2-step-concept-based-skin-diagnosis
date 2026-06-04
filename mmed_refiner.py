@@ -203,6 +203,8 @@ YOUR REFINED DESCRIPTION:"""
         output = re.sub(r'^\s*[-•*]\s*', '', output, flags=re.MULTILINE)
         
         # Extract first complete sentence starting with "The color"
+        if not output.lower().startswith('the color is'):
+            output = 'The color is ' + output
         match = re.search(r'The color is .+?elevation is [^.]+\.', output, re.IGNORECASE | re.DOTALL)
         if match:
             return match.group(0)
