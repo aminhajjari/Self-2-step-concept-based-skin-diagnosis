@@ -164,16 +164,19 @@ EXAMPLES OF GOOD FIXES:
         """Build query with clear task description."""
         
         # Make violations more prominent
+        def _build_query(self, concepts_str: str, feedback: str, violated_concepts: set) -> str:
+        """Build query with clear task description."""
+    
         violation_list = "\n".join([f"• {v}" for v in feedback.split('\n') if v])
-        
-        query = f"""CURRENT DESCRIPTION:
-{concepts_str}
-
-VIOLATIONS TO FIX:
-{violation_list}
-
-TASK: Rewrite fixing ONLY the violated concepts.
-The color is"""
+    
+        query = (
+            f"CURRENT DESCRIPTION:\n{concepts_str}\n\n"
+            f"VIOLATIONS TO FIX:\n{violation_list}\n\n"
+            f"TASK: Rewrite fixing ONLY the violated concepts.\n"
+            f"The color is"
+        )
+    
+        return query
 
 OUTPUT FORMAT (copy this structure exactly):
 The color is [KEEP OR FIX], the shape is [KEEP OR FIX], the border is [KEEP OR FIX], the dermoscopic patterns are [KEEP OR FIX], the texture is [KEEP OR FIX], the symmetry is [KEEP OR FIX], the elevation is [KEEP OR FIX].
