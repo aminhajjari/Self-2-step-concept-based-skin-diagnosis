@@ -172,7 +172,17 @@ for n_shots in 0 1 2 4 8; do
     echo "  HAM10000 ${HAM_DEMOS}-shot done"
 
 done
-
+# ── NoRefine baseline for McNemar ──
+for dataset in Derm7pt HAM10000; do
+    for llm in MMed Mistral; do
+        for n_shots in 0 1; do
+            [ $n_shots -eq 0 ] && DEMOS_FLAG="" || DEMOS_FLAG="--use_demos"
+            run_stage --dataset $dataset --concept_extractor Explicd \
+                      --llm $llm --ckpt $MMED_CKPT $DEMOS_FLAG \
+                      --n_demos $n_shots --refiner none
+        done
+    done
+done
 echo "✓ STEP 2 complete"
 
 # ══════════════════════════════════════════════════════════════════════════════
