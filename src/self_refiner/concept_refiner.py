@@ -165,6 +165,7 @@ class ConceptSelfRefine:
 
     def parse_concepts(self, concepts_str: str) -> Dict[str, str]:
         """Parse concept string into dictionary."""
+        print(f"[DEBUG parse_concepts IN]: {repr(concepts_str)}")
         concepts_dict = {}
         keys = ['color', 'shape', 'border', 'dermoscopic patterns', 'texture', 'symmetry', 'elevation']
 
@@ -173,7 +174,7 @@ class ConceptSelfRefine:
             match = re.search(pattern, concepts_str, re.IGNORECASE)
             if match:
                 concepts_dict[key] = match.group(1).strip()
-
+        print(f"[DEBUG parse_concepts OUT]: {concepts_dict}")
         return concepts_dict
 
     def refine(self, initial_concepts: str, diagnosis: str = None) -> Tuple[str, Dict]:
