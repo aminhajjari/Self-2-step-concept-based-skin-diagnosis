@@ -157,7 +157,9 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
             from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
             print("\n[INFO] Using rule-based refiner (no LLM).")
             mmed_refiner = SimpleRuleBasedRefiner()
-            
+        elif refiner_name == 'none':
+            print("\n[INFO] No refinement.")
+            mmed_refiner = None   
     else:
         raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
       
