@@ -172,7 +172,8 @@ EXAMPLES OF GOOD FIXES:
 VIOLATIONS TO FIX:
 {violation_list}
 
-TASK: Rewrite the COMPLETE description fixing ONLY the concepts mentioned above.
+TASK: Rewrite fixing ONLY the violated concepts.
+The color is"""
 
 OUTPUT FORMAT (copy this structure exactly):
 The color is [KEEP OR FIX], the shape is [KEEP OR FIX], the border is [KEEP OR FIX], the dermoscopic patterns are [KEEP OR FIX], the texture is [KEEP OR FIX], the symmetry is [KEEP OR FIX], the elevation is [KEEP OR FIX].
