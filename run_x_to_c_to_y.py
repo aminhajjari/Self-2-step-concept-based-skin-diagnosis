@@ -545,7 +545,11 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             # zip interleaves; chain picks up any leftover from the longer list
             
             interleaved = [d for pair in zip_longest(nevus_demos, melanoma_demos)
-                           for d in pair if d is not None]
+               for d in pair if d is not None]
+            if not interleaved:
+                # fallback: take any demos regardless of class balance
+                all_clean = clean_demos_by_class['nevus'] + clean_demos_by_class['melanoma']
+                interleaved = all_clean[:n_demos]
             demos_to_use_in_prompt = interleaved if interleaved else None
     
         if concept_extractor != "Explicd":
