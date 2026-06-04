@@ -68,7 +68,8 @@ class ConceptConsistencyRules:
                 )
 
         # Rule 7: Flat elevation + Ulcerated texture → contradiction  
-        if 'flat' in concepts_dict.get('elevation', '').lower():
+        elev = concepts_dict.get('elevation', '').lower()
+        if 'flat' in elev and 'raised' not in elev:
             if 'ulcerated' in concepts_dict.get('texture', '').lower():
                 violations.append(
                 "Flat elevation conflicts with ulcerated texture"
