@@ -44,8 +44,8 @@ class ConceptConsistencyRules:
 
         # Rule 4: Atypical patterns + Symmetry
         patterns = concepts_dict.get('dermoscopic patterns', '').lower()
-        if ('atypical' in patterns or 'veil' in patterns):
-            if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
+        sym = concepts_dict.get('symmetry', '').lower()
+        if 'symmetrical' in sym and 'asymmetric' not in sym and 'depending on type' not in sym:
                 violations.append(
                     "Atypical patterns need asymmetry (not symmetrical)"
                 )
