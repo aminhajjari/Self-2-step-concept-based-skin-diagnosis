@@ -45,7 +45,8 @@ class ConceptConsistencyRules:
         # Rule 4: Atypical patterns + Symmetry
         patterns = concepts_dict.get('dermoscopic patterns', '').lower()
         sym = concepts_dict.get('symmetry', '').lower()
-        if 'symmetrical' in sym and 'asymmetric' not in sym and 'depending on type' not in sym:
+        if ('atypical' in patterns or 'veil' in patterns):
+            if 'symmetrical' in sym and 'asymmetric' not in sym and 'depending on type' not in sym:
                 violations.append(
                     "Atypical patterns need asymmetry (not symmetrical)"
                 )
@@ -53,12 +54,12 @@ class ConceptConsistencyRules:
       
         # Rule 5: Irregular shape + Symmetric → contradiction
         shape = concepts_dict.get('shape', '').lower()
-        if shape.strip() == 'irregular':  # exact match, not 'round to irregular'
-            if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
-                if 'asymmetric' not in concepts_dict.get('symmetry', '').lower():
-                    violations.append(
-                        "Irregular shape typically means asymmetry (not symmetrical)"
-                    )
+        if shape.strip() == 'irregular':
+            sym = concepts_dict.get('symmetry', '').lower()
+            if 'symmetrical' in sym and 'asymmetric' not in sym and 'depending on type' not in sym:
+                violations.append(
+                    "Irregular shape typically means asymmetry (not symmetrical)"
+                )
 
         # Rule 6: Atypical patterns + Regular border → contradiction
         if 'atypical' in concepts_dict.get('dermoscopic patterns', '').lower():
@@ -167,16 +168,13 @@ class ConceptSelfRefine:
 
     def parse_concepts(self, concepts_str: str) -> Dict[str, str]:
         """Parse concept string into dictionary."""
-        print(f"[DEBUG parse_concepts IN]: {repr(concepts_str)}")
         concepts_dict = {}
         keys = ['color', 'shape', 'border', 'dermoscopic patterns', 'texture', 'symmetry', 'elevation']
-
         for key in keys:
             pattern = rf"(?:the\s+)?{re.escape(key)}\s+(?:is|are)\s+([^,\.]+)"
             match = re.search(pattern, concepts_str, re.IGNORECASE)
             if match:
                 concepts_dict[key] = match.group(1).strip()
-        print(f"[DEBUG parse_concepts OUT]: {concepts_dict}")
         return concepts_dict
 
     def refine(self, initial_concepts: str, diagnosis: str = None) -> Tuple[str, Dict]:
