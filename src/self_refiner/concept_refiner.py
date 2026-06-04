@@ -79,9 +79,10 @@ class ConceptConsistencyRules:
         if 'multiple colors' in concepts_dict.get('color', '').lower():
             if 'symmetrical' in concepts_dict.get('symmetry', '').lower():
                 if 'asymmetric' not in concepts_dict.get('symmetry', '').lower():
-                    violations.append(
-                    "Multiple colors typically indicate asymmetrical lesions"
-                    )
+                    if 'depending on type' not in concepts_dict.get('symmetry', '').lower():
+                        violations.append(
+                        "Multiple colors typically indicate asymmetrical lesions"
+                        )
      
         return violations
 
