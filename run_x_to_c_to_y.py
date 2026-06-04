@@ -529,7 +529,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                 if demo_label not in clean_demos_by_class:
                     continue
 
-                if count_violations(demo_concepts_only) == 0:
+                if count_violations(demo_concepts_only) <= 1:
                     clean_demos_by_class[demo_label].append(demo_concepts_only)
 
                 # Stop early once we have enough of both classes
