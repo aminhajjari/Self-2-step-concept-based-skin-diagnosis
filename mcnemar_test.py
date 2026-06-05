@@ -84,28 +84,23 @@ def main():
     print("="*85)
     
     COMPARISONS = [
-        # (dataset, n_shots, label_a, llm_a, refiner_a, label_b, llm_b, refiner_b)
-        # Key comparison: best config vs no-refinement
+        # Compare refiners against each other
         ("Derm7pt", 0,
          "Rule+Mistral(0-shot)", "Mistral", "rule",
-         "NoRefine+Mistral(0-shot)", "Mistral", "none"),
-        ("Derm7pt", 1,
-         "Rule+Mistral(1-shot)", "Mistral", "rule",
-         "NoRefine+Mistral(1-shot)", "Mistral", "none"),
-        ("HAM10000", 0,
-         "MMed+MMed(0-shot)", "MMed", "mmed",
-         "NoRefine+MMed(0-shot)", "MMed", "none"),
-        ("HAM10000", 1,
-         "MMed+MMed(1-shot)", "MMed", "mmed",
-         "NoRefine+MMed(1-shot)", "MMed", "none"),
-        # Compare refiners against each other
+         "MMed+Mistral(0-shot)", "Mistral", "mmed"),
         ("Derm7pt", 1,
          "Rule+Mistral(1-shot)", "Mistral", "rule",
          "MMed+Mistral(1-shot)", "Mistral", "mmed"),
         ("Derm7pt", 1,
          "Rule+MMed(1-shot)", "MMed", "rule",
          "MMed+MMed(1-shot)", "MMed", "mmed"),
-    ]
+        ("HAM10000", 0,
+         "Rule+MMed(0-shot)", "MMed", "rule",
+         "MMed+MMed(0-shot)", "MMed", "mmed"),
+        ("HAM10000", 1,
+         "Rule+MMed(1-shot)", "MMed", "rule",
+         "MMed+MMed(1-shot)", "MMed", "mmed"),
+   ]
     
     print(f"\n  {'Comparison':<45} {'Acc A':>6} {'Acc B':>6} "
           f"{'p-value':>9} {'Sig?':>6}")
