@@ -76,16 +76,21 @@ class Explicd:
             # Get concept predictions
             concept_preds = []
             raw_scores = []
+            concept_margins = {}
             for key in self.model.concept_token_dict.keys():
                 scores = softmax(image_logits_dict[key].cpu().numpy())
                 raw_scores.extend(scores.flatten())
+                # top-1 minus top-2 probability = confidence margin for this concept
+                flat = scores.flatten()
+                top2 = np.sort(flat)[::-1][:2]
+                concept_margins[key] = float(top2[0] - top2[1]) if flat.size > 1 else 1.0
                 # Get corresponding description
                 description = self.model.concept_list[key][scores.argmax()]
                 concept_preds.append(description)
 
             dict_data[img_id] = template.format(*concept_preds)
         
-        return dict_data[img_id], raw_scores
+        return dict_data[img_id], raw_scores, concept_margins
 
     
     def get_concept_predictions_with_self_refine(self, batch, config, use_self_refine=True, llm_refiner=None):
