@@ -283,7 +283,8 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
                      batch=batch,
                      config=config,
                      use_self_refine=True,
-                     llm_refiner=mmed_refiner
+                     llm_refiner=mmed_refiner,
+                     margin_threshold=margin_threshold 
                 )
                  # ── save refinement stats for this train image ────────────
                  dict_refinement_stats[img_ids[0]] = {
