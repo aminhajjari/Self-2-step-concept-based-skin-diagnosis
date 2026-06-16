@@ -586,7 +586,8 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                 elif 'nevus' in raw_output.lower():
                     llm_response = 'nevus'
                 else:
-                    llm_response = map_letter_to_label(raw_output[:1])
+                    n_unparsed += 1
+                    llm_response = 'nevus'   # consistent, conservative default
             
             
         dict_responses['image_id'].append(img_id)
