@@ -93,7 +93,8 @@ def count_violations(report_str: str) -> int:
 def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
            n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', 
-           predict_for_train_set=False, data_path='data', concept_reference_dict: str = 'PH2'):
+           predict_for_train_set=False, data_path='data', concept_reference_dict: str = 'PH2',
+           margin_threshold: float = 0.2):
     """Predicts concepts from MONET.
 
     Args:
@@ -688,7 +689,7 @@ if __name__ == "__main__":
     parser.add_argument('--data_path', type=str, default='data')
     parser.add_argument('--refiner', type=str, default='mmed', choices=['mmed', 'mistral', 'rule', 'none'])
     parser.add_argument('--random_demos', action="store_true", help='Use random demo selection instead of RICES')
-
+    parser.add_argument('--margin_threshold', type=float, default=0.2)
     args = parser.parse_args()
     seed_everything(seed=42)
 
