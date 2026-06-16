@@ -32,16 +32,14 @@ class Mistral:
         return prompt
 
     def predict(self, prompt, max_new_tokens):
-        inputs = self.tokenizer(prompt, return_tensors="pt").to(0)
+        messages = [{"role": "user", "content": prompt}]
+        input_ids = self.tokenizer.apply_chat_template(
+            messages, return_tensors="pt", add_generation_prompt=True
+        ).to(0)
         generated_ids = self.model.generate(
-            **inputs, max_new_tokens=max_new_tokens,
-            pad_token_id=self.tokenizer.eos_token_id, use_cache=True
+            input_ids, max_new_tokens=max_new_tokens,
+            pad_token_id=self.tokenizer.eos_token_id,
+            do_sample=False, use_cache=True
         )
-        decoded = self.tokenizer.batch_decode(
-            generated_ids, skip_special_tokens=True,
-            clean_up_tokenization_spaces=True
-        )[0]
-        input_len = inputs.input_ids.shape[1]
-        new_tokens = generated_ids[0][input_len:]
-        mistral_response = self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-        return mistral_response
+        new_tokens = generated_ids[0][input_ids.shape[1]:]
+        return self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
