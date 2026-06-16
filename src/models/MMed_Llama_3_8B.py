@@ -67,19 +67,25 @@ class MMedLlama3:
         
     def predict(self, prompt, max_new_tokens):
         messages = [{"role": "user", "content": prompt}]
-        input_ids = self.tokenizer.apply_chat_template(
-            messages, return_tensors="pt", add_generation_prompt=True
-        ).cuda()
+        try:
+            input_ids = self.tokenizer.apply_chat_template(
+                messages, return_tensors="pt", add_generation_prompt=True
+            ).cuda()
+        except Exception:
+            # Fallback: manual Llama-3 chat format (no/broken chat_template)
+            text = (
+                "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n"
+                f"{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+            )
+            input_ids = self.tokenizer(text, return_tensors="pt",
+                                       add_special_tokens=False).input_ids.cuda()
 
         with torch.no_grad():
             output = self.model.generate(
-                input_ids,
-                max_new_tokens=max_new_tokens,
+                input_ids, max_new_tokens=max_new_tokens,
                 pad_token_id=self.tokenizer.eos_token_id,
-                do_sample=False,
-                top_k=50,
+                do_sample=False, top_k=50,
             )
-
         new_tokens = output[0][input_ids.shape[1]:]
         return self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
