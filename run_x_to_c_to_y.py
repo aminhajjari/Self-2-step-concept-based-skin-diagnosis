@@ -716,7 +716,8 @@ if __name__ == "__main__":
             raw_values=args.raw_values,
             predict_for_train_set=args.predict_for_train_set,
             data_path=args.data_path,
-            refiner_name=args.refiner
+            refiner_name=args.refiner,
+            margin_threshold=args.margin_threshold
         )
 
     # ====================== STEP 2 + 3: Classify and Evaluate ======================
