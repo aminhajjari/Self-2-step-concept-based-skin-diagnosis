@@ -84,17 +84,10 @@ def normalize_concepts_for_mmed(concepts_str: str, model_name: str) -> str:
 
 
 def count_violations(report_str: str) -> int:
-    from src.self_refiner.concept_refiner import ConceptConsistencyRules
-    import re
+    from src.self_refiner.concept_refiner import ConceptConsistencyRules, ConceptSelfRefine
     rules = ConceptConsistencyRules()
-    concepts_dict = {}
-    keys = ['color', 'shape', 'border', 'dermoscopic patterns',
-            'texture', 'symmetry', 'elevation']
-    for key in keys:
-        pattern = rf"(?:the\s+)?{re.escape(key)}\s+(?:is|are)\s+([^,\.]+)"
-        match = re.search(pattern, report_str, re.IGNORECASE)
-        if match:
-            concepts_dict[key] = match.group(1).strip()
+    parser = ConceptSelfRefine(llm_refine_fn=None)   # only used for parse_concepts
+    concepts_dict = parser.parse_concepts(report_str)
     return len(rules.check_consistency(concepts_dict))
 
 def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=False, 
