@@ -489,6 +489,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         else:
             rices = RICES(dataset=dataset, split=split, valid_ids=[]) # feature_extractor="explicd",
     demos_to_use_in_prompt = None
+    n_unparsed = 0
     for img_id, report in tqdm(zip(df_reports_test.image_id.to_list(), df_reports_test.report.to_list())):
 
         # Demonstrations
