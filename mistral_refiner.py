@@ -60,7 +60,10 @@ class MistralBasedRefiner:
             return SimpleRuleBasedRefiner()(concepts_str, feedback, concepts_dict)
 
         except Exception as e:
-            print(f"⚠ Mistral error: {e}, using rule-based fallback")
+            import traceback
+            print(f"⚠ Mistral error [{type(e).__name__}]: {repr(e)}, using rule-based fallback")
+            traceback.print_exc()
+        
             from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
             return SimpleRuleBasedRefiner()(concepts_str, feedback, concepts_dict)
 
