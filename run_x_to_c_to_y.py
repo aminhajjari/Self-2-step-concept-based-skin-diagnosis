@@ -597,6 +597,10 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         dict_responses['demonstrations'].append(demos_to_use_in_prompt)
         dict_responses['predicted_concepts'].append(concepts)
 
+
+    print(f"[PARSE] {dataset} {model_name} refiner={refiner_name} "
+          f"n_demos={n_demos}: {n_unparsed} unparsed answers")
+
     # Converter para DataFrame
     df = pd.DataFrame(dict_responses)
     
