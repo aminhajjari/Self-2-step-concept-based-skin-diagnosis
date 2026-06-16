@@ -93,7 +93,8 @@ class Explicd:
         return dict_data[img_id], raw_scores, concept_margins
 
     
-    def get_concept_predictions_with_self_refine(self, batch, config, use_self_refine=True, llm_refiner=None):
+    def get_concept_predictions_with_self_refine(self, batch, config, use_self_refine=True,
+                                                 llm_refiner=None, margin_threshold=0.2):
         """
         Step 1: Explicd extracts initial concepts from image (VLM job)
         Step 2: MMed refines concepts for clinical consistency (LLM job)
