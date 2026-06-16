@@ -127,7 +127,9 @@ class Explicd:
         if use_self_refine and llm_refiner is not None:
             print(f"[MMed] Starting self-refinement...")
             refiner = ConceptSelfRefine(llm_refine_fn=llm_refiner)
-            concepts_str, refinement_info = refiner.refine(concepts_str)
+            concepts_str, refinement_info = refiner.refine(
+                concepts_str, concept_margins=concept_margins
+            )
             print(f"[MMed] Refinement done: {refinement_info}")
         else:
             print(f"[INFO] Self-refine skipped (use_self_refine={use_self_refine}, llm_refiner={llm_refiner is not None})")
