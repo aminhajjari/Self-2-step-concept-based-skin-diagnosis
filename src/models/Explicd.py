@@ -129,7 +129,8 @@ class Explicd:
             print(f"[MMed] Starting self-refinement...")
             refiner = ConceptSelfRefine(llm_refine_fn=llm_refiner)
             concepts_str, refinement_info = refiner.refine(
-                concepts_str, concept_margins=concept_margins
+                concepts_str, concept_margins=concept_margins,
+                margin_threshold=margin_threshold
             )
             print(f"[MMed] Refinement done: {refinement_info}")
         else:
