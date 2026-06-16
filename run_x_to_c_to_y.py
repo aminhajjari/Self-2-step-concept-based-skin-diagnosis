@@ -525,7 +525,9 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                     continue
 
                 if count_violations(demo_concepts_only) <= 1:
-                    clean_demos_by_class[demo_label].append(demo_concepts_only)
+                   demo_letter = 'A' if demo_label == 'nevus' else 'B'
+                   exemplar = f"{query.format(demo_concepts_only)} {demo_letter}. {demo_label.capitalize()}"
+                   clean_demos_by_class[demo_label].append(exemplar)
 
                 # Stop early once we have enough of both classes
                 per_class_needed = max(1, n_demos // 2)
