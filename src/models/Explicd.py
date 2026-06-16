@@ -112,7 +112,7 @@ class Explicd:
         from src.self_refiner.concept_refiner import ConceptSelfRefine
 
         # Step 1: Explicd extracts initial concepts from image (VLM job)
-        concepts_str, raw_scores = self.get_concept_predictions(batch, config)
+        concepts_str, raw_scores, concept_margins = self.get_concept_predictions(batch, config)
         
         print(f"\n[Explicd] Initial concepts: {concepts_str}")
 
