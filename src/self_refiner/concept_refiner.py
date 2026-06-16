@@ -167,15 +167,20 @@ class ConceptSelfRefine:
         self.rules = ConceptConsistencyRules()
 
     def parse_concepts(self, concepts_str: str) -> Dict[str, str]:
-        """Parse concept string into dictionary."""
-        concepts_dict = {}
-        keys = ['color', 'shape', 'border', 'dermoscopic patterns', 'texture', 'symmetry', 'elevation']
-        for key in keys:
-            pattern = rf"(?:the\s+)?{re.escape(key)}\s+(?:is|are)\s+([^,\.]+)"
-            match = re.search(pattern, concepts_str, re.IGNORECASE)
-            if match:
-                concepts_dict[key] = match.group(1).strip()
-        return concepts_dict
+    """Parse concept string into dict; values may themselves contain commas."""
+    concepts_dict = {}
+    fields = ['color', 'shape', 'border', 'dermoscopic patterns',
+              'texture', 'symmetry', 'elevation']
+    nxt = "|".join(re.escape(k) for k in fields)
+    for key in fields:
+        pattern = (
+            rf"{re.escape(key)}\s+(?:is|are)\s+(.+?)"
+            rf"(?:,\s*(?:the\s+)?(?:{nxt})\s+(?:is|are)\b|\.?\s*$)"
+        )
+        m = re.search(pattern, concepts_str, re.IGNORECASE | re.DOTALL)
+        if m:
+            concepts_dict[key] = m.group(1).strip().rstrip(',').strip()
+    return concepts_dict
 
     def refine(self, initial_concepts: str, diagnosis: str = None) -> Tuple[str, Dict]:
         """
