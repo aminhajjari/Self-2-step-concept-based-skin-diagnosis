@@ -182,15 +182,28 @@ class ConceptSelfRefine:
             concepts_dict[key] = m.group(1).strip().rstrip(',').strip()
     return concepts_dict
 
-    def refine(self, initial_concepts: str, diagnosis: str = None) -> Tuple[str, Dict]:
+    def refine(self, initial_concepts: str, diagnosis: str = None,
+               concept_margins: Dict = None, margin_threshold: float = 0.2) -> Tuple[str, Dict]:
         """
-        Iteratively refine concepts with improved stopping logic.
-        
-        NEW: Accept "good enough" (1-2 violations after 2 iterations)
+        Iteratively refine concepts.
+        - Logical violations (from the rules) drive the loop and convergence.
+        - Low-confidence concepts (small top1-top2 margin) are NOT counted as
+          violations, but are passed to the LLM as a hint to reconsider.
         """
         current = initial_concepts
         history = [initial_concepts]
         violation_counts = []
+
+        # Confidence signal: which concepts is the vision model unsure about?
+        uncertain = []
+        if concept_margins:
+            uncertain = [k for k, m in concept_margins.items() if m < margin_threshold]
+        uncertainty_note = ""
+        if uncertain:
+            uncertainty_note = (
+                "The image model is low-confidence about: " + ", ".join(uncertain) +
+                ". Reconsider these concepts so they are clinically consistent with the others."
+            )
         
         info = {
             'iterations': 0,
@@ -218,8 +231,10 @@ class ConceptSelfRefine:
                     for v in violations:
                         print(f"  • {v}")
             
-            # PERFECT: No violations
-            if n_viols == 0:
+            
+            # PERFECT: No violations. But give the LLM ONE pass if the vision
+            # model flagged uncertain concepts on the first iteration.
+            if n_viols == 0 and not (i == 0 and uncertain):
                 if self.verbose:
                     print(f"✓ Perfect convergence at iteration {i}")
                 info['converged'] = True
@@ -244,8 +259,11 @@ class ConceptSelfRefine:
                         print(f"⚠ Stuck at {last_three[0]} violations for 3 iterations, stopping")
                     break
             
+            
             # Try to refine
             feedback = "\n".join(violations)
+            if i == 0 and uncertainty_note:
+                feedback = (feedback + "\n" + uncertainty_note).strip()
             
             try:
                 refined = self.llm_refine_fn(current, feedback, concepts_dict)
