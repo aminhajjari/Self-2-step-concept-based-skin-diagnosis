@@ -66,29 +66,20 @@ class MMedLlama3:
         return len(original_prompt)
         
     def predict(self, prompt, max_new_tokens):
-        #input_str = ("You are a {language} doctor. Analyze the reasons behind choosing this particular option in 100 words for the following question in {language}. ###Question: {question} ###Options: {options} ###Answer: {answer_id} ###Rationale:")
-
-        model_inputs = self.tokenizer(
-            prompt,
-            return_tensors='pt',
-            add_special_tokens=False,
-        )
+        messages = [{"role": "user", "content": prompt}]
+        input_ids = self.tokenizer.apply_chat_template(
+            messages, return_tensors="pt", add_generation_prompt=True
+        ).cuda()
 
         with torch.no_grad():
-            topk_output = self.model.generate(
-                model_inputs.input_ids.cuda(),
+            output = self.model.generate(
+                input_ids,
                 max_new_tokens=max_new_tokens,
                 pad_token_id=self.tokenizer.eos_token_id,
                 do_sample=False,
-                top_k=50
+                top_k=50,
             )
 
-        output_str = self.tokenizer.batch_decode(topk_output)  # a list containing just one str
-
-        # get_length_of_prompt counts characters, but tokenization != characters
-        # Decode only the *newly generated* tokens instead
-        input_len = model_inputs.input_ids.shape[1]
-        new_tokens = topk_output[0][input_len:]
+        new_tokens = output[0][input_ids.shape[1]:]
         return self.tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-
 
