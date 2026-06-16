@@ -55,7 +55,10 @@ class MMedBasedRefiner:
                     return fallback(concepts_str, feedback, concepts_dict)
 
         except Exception as e:
-            print(f"⚠ LLM refinement error: {e}, using rule-based fallback")
+            import traceback
+            print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)}, using rule-based fallback")
+            traceback.print_exc()
+            
             from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
             fallback = SimpleRuleBasedRefiner()
             return fallback(concepts_str, feedback, concepts_dict)
