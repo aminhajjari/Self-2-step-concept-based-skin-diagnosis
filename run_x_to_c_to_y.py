@@ -190,11 +190,12 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
             #predicted_concepts, _ = model.get_concept_predictions(batch=batch, config=config) 
         elif model_name == "Explicd":
             predicted_concepts, _, refinement_info = model.get_concept_predictions_with_self_refine(
-                 batch=batch,
-                 config=config,
-                 use_self_refine=True,
-                 llm_refiner=mmed_refiner
-            )
+                     batch=batch,
+                     config=config,
+                     use_self_refine=True,
+                     llm_refiner=mmed_refiner,
+                     margin_threshold=margin_threshold
+                )
                     
             # ── save refinement stats for this image ──────────────────────
             dict_refinement_stats[img_ids[0]] = {
@@ -720,19 +721,16 @@ if __name__ == "__main__":
 
     # ====================== STEP 2 + 3: Classify and Evaluate ======================
     else:
-        c_to_y(
-            model_name=args.llm,
+        x_to_c(
+            model_name=args.model,
             dataset=args.dataset,
-            ckpt=classifier_ckpt,
+            concept_reference_dict=args.concept_reference_dict,
             split=args.split,
             raw_values=args.raw_values,
-            concept_extractor=args.concept_extractor,
-            report_path=args.report_path,
-            use_demos=args.use_demos,
-            n_demos=args.n_demos,
-            ground_truth_concepts=args.gt_concepts,
+            predict_for_train_set=args.predict_for_train_set,
+            data_path=args.data_path,
             refiner_name=args.refiner,
-            random_demos=args.random_demos
+            margin_threshold=args.margin_threshold
         )
 
         classification(
