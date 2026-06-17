@@ -49,19 +49,13 @@ class MMedBasedRefiner:
                     print(f"✓ Extraction successful")
                     return extracted
                 else:
-                    print(f"⚠ Extraction failed, using rule-based fallback")
-                    from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
-                    fallback = SimpleRuleBasedRefiner()
-                    return fallback(concepts_str, feedback, concepts_dict)
-
+                    print("⚠ LLM produced invalid output — keeping ORIGINAL concepts (no-op)")
+                    return concepts_str
         except Exception as e:
             import traceback
-            print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)}, using rule-based fallback")
+            print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
             traceback.print_exc()
-            
-            from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
-            fallback = SimpleRuleBasedRefiner()
-            return fallback(concepts_str, feedback, concepts_dict)
+            return concepts_str
 
     def _extract_violated_concepts(self, feedback: str) -> set:
         violated = set()
