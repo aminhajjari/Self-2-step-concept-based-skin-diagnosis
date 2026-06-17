@@ -55,9 +55,8 @@ class MistralBasedRefiner:
                 print("✓ Extraction successful")
                 return extracted
 
-            print("⚠ Extraction failed, using rule-based fallback")
-            from src.self_refiner.concept_refiner import SimpleRuleBasedRefiner
-            return SimpleRuleBasedRefiner()(concepts_str, feedback, concepts_dict)
+            print("⚠ Mistral produced invalid output — keeping ORIGINAL concepts (no-op)")
+            return concepts_str
 
         except Exception as e:
             import traceback
