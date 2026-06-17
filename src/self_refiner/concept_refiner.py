@@ -22,10 +22,11 @@ class ConceptConsistencyRules:
                     "Asymmetric lesions need irregular borders (not sharp/well-defined)"
                 )
 
+        
         # Rule 2: Multiple Colors + Patterns
         if 'multiple colors' in concepts_dict.get('color', '').lower():
             patterns = concepts_dict.get('dermoscopic patterns', '').lower()
-            if 'regular' in patterns:
+            if re.search(r'\bregular\b', patterns):          # was: 'regular' in patterns
                 violations.append(
                     "Multiple colors need irregular patterns (not regular)"
                 )
@@ -100,9 +101,10 @@ class SimpleRuleBasedRefiner:
             if 'sharp' in refined.get('border', '').lower():
                 refined['border'] = 'often blurry and irregular'
 
+       
         # Fix 2: Multiple colors → Irregular patterns
         if 'multiple colors' in refined.get('color', '').lower():
-            if 'regular' in refined.get('dermoscopic patterns', '').lower():
+            if re.search(r'\bregular\b', refined.get('dermoscopic patterns', '').lower()):
                 refined['dermoscopic patterns'] = 'atypical pigment network, irregular streaks'
 
         # Fix 3: Smooth texture → Flat elevation
