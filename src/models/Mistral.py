@@ -34,8 +34,10 @@ class Mistral:
     def predict(self, prompt, max_new_tokens):
         messages = [{"role": "user", "content": prompt}]
         input_ids = self.tokenizer.apply_chat_template(
-            messages, return_tensors="pt", add_generation_prompt=True
-        ).to(0)
+            messages, return_tensors="pt", add_generation_prompt=True,
+            return_dict=False,        # <-- get a tensor, not a BatchEncoding
+        )
+        input_ids = input_ids.to(self.model.device)   # <-- safer than .to(0) with device_map="auto"
         generated_ids = self.model.generate(
             input_ids, max_new_tokens=max_new_tokens,
             pad_token_id=self.tokenizer.eos_token_id,
