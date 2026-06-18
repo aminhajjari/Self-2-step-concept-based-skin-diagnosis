@@ -483,7 +483,11 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     A skin lesion is a nevus when it has the majority of the following concepts: uniformly tan, brown, or black, round, sharp and well-defined, regular pigment network, symmetric dots and globules, smooth, symmetrical, raised with possible central ulceration.\n
     A skin lesion is a melanoma when it has the majority of the following concepts: highly variable, often with multiple colors (black, brown, red, white, blue), irregular, often blurry and irregular, atypical pigment network, irregular streaks, blue-whitish veil, irregular, a raised or ulcerated surface, asymmetrical, flat to raised.\n"""
     query = """###Question: What is the type of skin lesion that is associated with the following dermoscopic concepts: {}. ###Options: A. Nevus\nB. Melanoma. ###Answer:"""
-
+    # Inject the decision criteria when there are no demos to anchor the model.
+    # MMed survives 0-shot (medical model); general Mistral does not, and
+    # collapses to "predict melanoma for everything" (Sens 100 / Spec 0).
+    if not use_demos or n_demos == 0:
+        instruction = instruction + "\n" + hint
     # Demonstrations
     if use_demos:
         if random_demos:
