@@ -6,22 +6,14 @@
 #SBATCH --account=def-arashmoh_gpu
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/debug_mmed_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/debug_mmed_%j.err
-
 module purge
 module load gcc python/3.10 cuda/12.6 opencv/4.10.0
 source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
-
 export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export CUDA_VISIBLE_DEVICES=0
 export HF_HOME=/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/hf_cache
 export HF_HUB_CACHE=$HF_HOME
-
 cd /home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis
 
-python run_x_to_c_to_y.py \
-    --dataset PH2 --split 0 \
-    --model Explicd --concept_extractor Explicd \
-    --generate_concepts \
-    --data_path data \
-    --refiner mmed
+python mmed_refiner.py
