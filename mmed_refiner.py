@@ -39,8 +39,18 @@ class MMedBasedRefiner:
             refined_concepts = self._clean_output(refined_concepts)
 
             if self._validate_format(refined_concepts):
-                print(f"✓ LLM refinement successful")
-                return refined_concepts
+                from src.self_refiner.concept_refiner import (
+                    ConceptConsistencyRules, ConceptSelfRefine, SimpleRuleBasedRefiner)
+                _parser = ConceptSelfRefine(llm_refine_fn=None)
+                _rules  = ConceptConsistencyRules()
+                before = len(_rules.check_consistency(concepts_dict))
+                after  = len(_rules.check_consistency(_parser.parse_concepts(refined_concepts)))
+                if after < before:
+                    print(f"✓ LLM refinement successful ({before}->{after} violations)")
+                    return refined_concepts
+                else:
+                    print(f"⚠ LLM echoed input ({before}->{after}), using rule-based fix")
+                    return SimpleRuleBasedRefiner()(concepts_str, feedback, concepts_dict)
             else:
                 print(f"⚠ Format validation failed, attempting extraction...")
                 extracted = self._try_extract_concepts(refined_concepts, concepts_dict)
