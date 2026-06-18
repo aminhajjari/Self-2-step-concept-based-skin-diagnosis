@@ -58,8 +58,9 @@ echo ""
 # stderr (real errors) → stays in .err via SLURM naturally
 run_stage() {
     echo ">>> $(date '+%H:%M:%S') python run_x_to_c_to_y.py $@"
+    # AFTER  — keep stderr (errors), only hide stdout (tqdm/debug noise)
     python run_x_to_c_to_y.py "$@" \
-        2>/dev/null 1>/dev/null   # suppress ALL verbose output per stage
+        1>/dev/null               # hide verbose stdout, keep real errors in .err
     EXIT_CODE=$?
     if [ $EXIT_CODE -ne 0 ]; then
         echo "ERROR: stage failed with exit code $EXIT_CODE — args: $@" >&2
