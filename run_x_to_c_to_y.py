@@ -574,27 +574,29 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                 gt_response = "nevus"  # fallback, should never happen
             input_query = query.format(concepts)
         
-        if model_name == "GPT": # TODO: maybe uniformize in the future
-            """ GPT-4 """
-            llm_response = map_letter_to_label(model.inference_text(instruction=instruction, query=input_query, max_new_tokens=1).strip())
+        if model_name == "GPT":
+            raw_output = model.inference_text(
+                instruction=instruction,
+                query=input_query,
+                max_new_tokens=16,
+                demos=demos_to_use_in_prompt,
+            ).strip()
         else:
             prompt = model.get_prompt(instruction, input_query, demos=demos_to_use_in_prompt)
             raw_output = model.predict(prompt, max_new_tokens=10).strip()
-            print(f"[DEBUG] img={img_id} | raw_output={repr(raw_output)}")
-            # Try to find A or B anywhere in the output
-            import re as _re
-            match = _re.search(r'\b([AB])\b', raw_output)
-            if match:
-                llm_response = map_letter_to_label(match.group(1))
-            else:
-                # fallback: check if melanoma/nevus mentioned directly
-                if 'melanoma' in raw_output.lower():
-                    llm_response = 'melanoma'
-                elif 'nevus' in raw_output.lower():
-                    llm_response = 'nevus'
-                else:
-                    n_unparsed += 1
-                    llm_response = 'nevus'   # consistent, conservative default
+
+        print(f"[DEBUG] img={img_id} | model={model_name} | raw_output={repr(raw_output)}")
+        import re as _re
+        match = _re.search(r'\b([AB])\b', raw_output)
+        if match:
+            llm_response = map_letter_to_label(match.group(1))
+        elif 'melanoma' in raw_output.lower():
+            llm_response = 'melanoma'
+        elif 'nevus' in raw_output.lower():
+            llm_response = 'nevus'
+        else:
+            n_unparsed += 1
+            llm_response = 'nevus'   # consistent, conservative default
             
             
         dict_responses['image_id'].append(img_id)
