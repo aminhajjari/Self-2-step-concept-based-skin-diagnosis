@@ -465,7 +465,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     elif model_name == "Mistral":
         model = Mistral()
     elif model_name == "GPT":
-        model = GPT4o(model=ckpt)
+        model = GPT5(model=ckpt)
     else:
         raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
 
