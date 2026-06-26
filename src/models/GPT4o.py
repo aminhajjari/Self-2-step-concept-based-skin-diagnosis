@@ -3,28 +3,27 @@ import base64
 
 class GPT4o:
 
-    def __init__(self, model) -> None:
+    def __init__(self, model, reasoning_effort="none") -> None:
         self.client = OpenAI()
         self.model = model
+        self.reasoning_effort = reasoning_effort
 
     def encode_image(self, image_path):
         # Open the image file and encode it as a base64 string
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode("utf-8")
 
-    def inference_text(self, instruction, query, max_new_tokens):
+    def inference_text(self, instruction, query, max_new_tokens=16, demos=None):
+        user_content = query if not demos else "\n\n".join(demos) + "\n\n" + query
         completion = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": instruction},
-                {
-                    "role": "user",
-                    "content": query
-                }
+                {"role": "user", "content": user_content},
             ],
-            max_tokens=max_new_tokens  # Limit the output to N tokens
+            reasoning_effort=self.reasoning_effort,   # "none" = direct answer for GPT-5.5
+            max_completion_tokens=max_new_tokens,     # NOT max_tokens for GPT-5 family
         )
-
         return completion.choices[0].message.content
     
     def inference_vision(self, instruction, query, base64_image, max_new_tokens):
