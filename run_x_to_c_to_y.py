@@ -14,7 +14,7 @@ import random as rnd
 from src.models.MMed_Llama_3_8B import MMedLlama3
 from src.models.Explicd import Explicd
 from src.models.Mistral import Mistral
-from src.models.GPT4o import GPT5
+from src.models.GPT5 import GPT5
 from src.utils import map_label_to_name, load_data, generate_template, convert_numbers_to_concepts, map_letter_to_label, calculate_metrics, save_data_to_json, seed_everything, get_current_date
 from src.rices import RICES
 from mmed_refiner import MMedBasedRefiner
