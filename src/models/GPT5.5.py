@@ -1,7 +1,7 @@
 from openai import OpenAI
 import base64
 
-class GPT4o:
+class GPT5:
 
     def __init__(self, model, reasoning_effort="none") -> None:
         self.client = OpenAI()
@@ -53,7 +53,7 @@ class GPT4o:
 
 
 if __name__ == "__main__":
-    gpt = GPT4o(model="gpt-4o")
+    gpt = GPT5(model="gpt-5-5")
 
     #IMAGE_PATH = "/home/jcneves/datasets/Dermatology/Derm7pt/Fcl044.jpg"
     #base64_image = gpt.encode_image(image_path=IMAGE_PATH)
