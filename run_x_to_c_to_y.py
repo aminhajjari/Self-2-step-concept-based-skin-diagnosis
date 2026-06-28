@@ -577,7 +577,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
                 gt_response = "nevus"  # fallback, should never happen
             input_query = query.format(concepts)
         
-        if model_name == "GPT":
+        if model_name in ("GPT", "Gemini"):
             raw_output = model.inference_text(
                 instruction=instruction,
                 query=input_query,
