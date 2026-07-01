@@ -469,6 +469,8 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
         model = Mistral()
     elif model_name == "MedGemma":
         model = MedGemma(ckpt=ckpt)
+    elif model_name == "Qwen":
+        model = Qwen(ckpt=ckpt)
     elif model_name == "GPT":
         model = GPT5(model=ckpt)
     elif model_name == "Gemini":
