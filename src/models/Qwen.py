@@ -1,6 +1,5 @@
 import torch
-from transformers 
-import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 
 class Qwen:
