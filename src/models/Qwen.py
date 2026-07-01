@@ -10,8 +10,8 @@ class Qwen:
     def __init__(self, ckpt="Qwen/Qwen2.5-72B-Instruct-AWQ") -> None:
         self.tokenizer = AutoTokenizer.from_pretrained(ckpt, trust_remote_code=True)
         self.model = AutoModelForCausalLM.from_pretrained(
-            ckpt, device_map="auto",
-            torch_dtype=torch.float16, trust_remote_code=True,
+            ckpt, quantization_config=bnb, device_map={"": 0},
+            dtype=torch.bfloat16, trust_remote_code=True,
         )
 
     def get_prompt(self, instruction, query, demos=None):
