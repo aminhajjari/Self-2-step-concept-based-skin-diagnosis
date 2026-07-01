@@ -628,7 +628,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
             file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
             file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
-    elif model_name in ["Mistral", "GPT", "MedGemma", "Gemini"]:
+    elif model_name in ["Mistral", "GPT", "MedGemma", "Gemini", "Qwen"]:
         if split != None:
             file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
@@ -654,7 +654,7 @@ def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_value
             file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
             file_path = f"results/label_prediction/{dataset}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
-    elif model_name in ["Mistral", "GPT", "MedGemma", "Gemini"]:
+    elif model_name in ["Mistral", "GPT", "MedGemma", "Gemini", "Qwen"]:
         if split != None:
             file_path = f"results/label_prediction/{dataset}_split_{split}_{model_name}_diagnostic_report_validation_raw_values_{raw_values}_gt_concepts_{ground_truth_concepts}_model_extractor_{concept_extractor}_n_demos_{n_demos}_refiner_{refiner_name}_retrieval_{retrieval_tag}.csv"
         else:
