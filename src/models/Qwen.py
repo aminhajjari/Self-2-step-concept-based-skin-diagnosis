@@ -29,12 +29,23 @@ class Qwen:
 
     def predict(self, prompt, max_new_tokens):
         messages = [{"role": "user", "content": prompt}]
+        # tokenize=True + return_tensors -> returns a tensor of input_ids
         input_ids = self.tokenizer.apply_chat_template(
-            messages, return_tensors="pt", add_generation_prompt=True,
-        ).to(self.model.device)
+            messages,
+            add_generation_prompt=True,
+            return_tensors="pt",
+        )
+        # ensure it's a plain tensor (some versions return a dict/BatchEncoding)
+        if not torch.is_tensor(input_ids):
+            input_ids = input_ids["input_ids"]
+        input_ids = input_ids.to(self.model.device)
+
+        attention_mask = torch.ones_like(input_ids)
         with torch.no_grad():
             output = self.model.generate(
-                input_ids, max_new_tokens=max_new_tokens,
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                max_new_tokens=max_new_tokens,
                 do_sample=False,
                 pad_token_id=self.tokenizer.eos_token_id,
             )
