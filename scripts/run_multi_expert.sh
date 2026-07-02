@@ -22,7 +22,7 @@ mkdir -p $OUTPUT_BASE/results/multi_expert $OUTPUT_BASE/results/tables
 [ -e results ] || ln -s $OUTPUT_BASE/results results
 
 echo "=========================================="
-echo "  MULTI-EXPERT ENSEMBLE — MMed + Mistral + Qwen"
+echo "  MULTI-EXPERT ENSEMBLE — MMed + Mistral + MedGemma"
 echo "  Job ID: ${SLURM_JOB_ID}"
 echo "  Started: $(date)"
 echo "=========================================="
@@ -30,7 +30,7 @@ echo "=========================================="
 # One run per (n_demos, retrieval) setting actually present in results/label_prediction.
 # rices sweep: 0,1,2,4,8-shot ; random-demo baseline sweep: 1,2-shot
 python multi_expert_classifier.py \
-    --experts MMed Mistral Qwen \
+    --experts MMed Mistral MedGemma \
     --sweep 0:rices 1:rices 2:rices 4:rices 8:rices 1:random 2:random \
     --tie melanoma \
     --prob_col p_melanoma
