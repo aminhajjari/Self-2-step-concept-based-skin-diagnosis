@@ -14,12 +14,19 @@ RESULTS_DIR = Path("results/label_prediction")
 N_SPLITS    = 5
 
 CONFIGS = [
-    {"label": "Rule+MMed",       "llm": "MMed",    "refiner": "rule"},
-    {"label": "Rule+Mistral",    "llm": "Mistral", "refiner": "rule"},
-    {"label": "Mistral+Mistral", "llm": "Mistral", "refiner": "mistral"},
-    {"label": "Mistral+MMed",    "llm": "MMed",    "refiner": "mistral"},
-    {"label": "MMed+MMed",       "llm": "MMed",    "refiner": "mmed"},
-    {"label": "MMed+Mistral",    "llm": "Mistral", "refiner": "mmed"},
+    {"label": "Rule+MMed",       "llm": "MMed",     "refiner": "rule"},
+    {"label": "Rule+Mistral",    "llm": "Mistral",  "refiner": "rule"},
+    {"label": "Mistral+Mistral", "llm": "Mistral",  "refiner": "mistral"},
+    {"label": "Mistral+MMed",    "llm": "MMed",     "refiner": "mistral"},
+    {"label": "MMed+MMed",       "llm": "MMed",     "refiner": "mmed"},
+    {"label": "MMed+Mistral",    "llm": "Mistral",  "refiner": "mmed"},
+    # --- new classifiers ---
+    {"label": "Rule+MedGemma",    "llm": "MedGemma", "refiner": "rule"},
+    {"label": "Mistral+MedGemma", "llm": "MedGemma", "refiner": "mistral"},
+    {"label": "MMed+MedGemma",    "llm": "MedGemma", "refiner": "mmed"},
+    {"label": "Rule+Qwen",        "llm": "Qwen",     "refiner": "rule"},
+    {"label": "Mistral+Qwen",     "llm": "Qwen",     "refiner": "mistral"},
+    {"label": "MMed+Qwen",        "llm": "Qwen",     "refiner": "mmed"},
 ]
 
 PAPER_BACC = {"PH2": 78.07, "Derm7pt": 78.56, "HAM10000": 76.00}
