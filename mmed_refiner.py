@@ -1,14 +1,3 @@
-"""
-MMed-LLM Based Refiner for ExpLICD Self-Refine (Path D)
-Uses MMed-Llama-3-8B instead of GPT-4o (FREE - runs on cluster)
-
-ENHANCED VERSION with:
-- Improved prompts with clinical examples
-- Better output cleaning
-- Concept extraction/salvaging
-- Targeted refinement (only fix violated concepts)
-- Automatic fallback to rule-based when LLM fails
-"""
 
 import sys
 sys.path.append('.')
