@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from sklearn.metrics import balanced_accuracy_score, recall_score, confusion_matrix
+import glob
 
 # ── paths & constants ──────────────────────────────────────────────────────────
 RESULTS_DIR = Path("results/label_prediction")
@@ -121,7 +122,7 @@ def print_comparison_table(dataset, rows):
 
 
 def evaluate_concepts():
-    import glob
+    
     print("\n" + "="*78)
     print("  CONCEPT-LEVEL EVALUATION — violation reduction per refiner")
     print("="*78)
