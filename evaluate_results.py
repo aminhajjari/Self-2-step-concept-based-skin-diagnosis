@@ -19,34 +19,41 @@ N_SPLITS    = 5
 
 # The 6 configs to compare
 CONFIGS = [
-    {
-        "label"  : "ExpLICD+Rule+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
-        "refiner": "rule",
-    },
-    {
-        "label"  : "ExpLICD+Rule+Mistral",
-        "llm"    : "Mistral",
-        "refiner": "rule",
-    },
-    {
-        "label"  : "ExpLICD+Mistral+Mistral",
-        "llm"    : "Mistral",
-        "refiner": "mistral",
-    },
-    {
-        "label"  : "ExpLICD+Mistral+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
-        "refiner": "mistral",
-    },
-    {
-        "label"  : "ExpLICD+MMed+MMed",
-        "llm"    : "MMed",          # fixed: was "MMed-Llama-3-8B-EnIns"
-        "refiner": "mmed",
-    },
-    {
+{
         "label"  : "ExpLICD+MMed+Mistral",
         "llm"    : "Mistral",
+        "refiner": "mmed",
+    },
+    # ── new classifiers: MedGemma ──────────────────────────────
+    {
+        "label"  : "ExpLICD+Rule+MedGemma",
+        "llm"    : "MedGemma",
+        "refiner": "rule",
+    },
+    {
+        "label"  : "ExpLICD+Mistral+MedGemma",
+        "llm"    : "MedGemma",
+        "refiner": "mistral",
+    },
+    {
+        "label"  : "ExpLICD+MMed+MedGemma",
+        "llm"    : "MedGemma",
+        "refiner": "mmed",
+    },
+    # ── new classifiers: Qwen ──────────────────────────────────
+    {
+        "label"  : "ExpLICD+Rule+Qwen",
+        "llm"    : "Qwen",
+        "refiner": "rule",
+    },
+    {
+        "label"  : "ExpLICD+Mistral+Qwen",
+        "llm"    : "Qwen",
+        "refiner": "mistral",
+    },
+    {
+        "label"  : "ExpLICD+MMed+Qwen",
+        "llm"    : "Qwen",
         "refiner": "mmed",
     },
 ]
