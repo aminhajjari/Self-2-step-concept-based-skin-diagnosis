@@ -1,8 +1,3 @@
-"""
-Mistral-7B-Instruct Based Refiner for ExpLICD Self-Refine
-Drop-in replacement for MMedBasedRefiner — same interface, same fallback logic.
-Uses local checkpoint at checkpoint/Mistral-7B
-"""
 
 import sys
 sys.path.append('.')
