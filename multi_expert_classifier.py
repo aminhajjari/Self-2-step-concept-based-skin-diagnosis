@@ -1,39 +1,4 @@
-#!/usr/bin/env python
-"""Multi-Expert ensemble over existing per-classifier prediction CSVs.
 
-Reads results/label_prediction/, majority-votes across a committee of
-classifiers (the "experts") for each (dataset, split, refiner) group, and
-writes:
-  * per-group ensemble CSVs  -> results/multi_expert/
-  * comparison tables         -> results/tables/  (csv + markdown + latex)
-
-It NEVER modifies the core pipeline or any existing output. To fully remove
-the module, delete this file plus results/multi_expert/ and the ensemble_*
-files under results/tables/.
-
-Key design points
-------------------
-* Discovery-based: the committee is whatever experts you name AND that are
-  actually present for a given (dataset, split, refiner). This mirrors the
-  pipeline instead of re-declaring a CONFIGS matrix that could drift.
-* The table reports EACH committee member alongside the ensemble, so the
-  paper-relevant question -- "does voting beat the best single expert?" --
-  is answerable directly. The per-refiner delta (ensemble - best member) is
-  computed for you.
-* Hard voting by default. If the label CSVs contain a melanoma-probability
-  column (see --prob_col), soft voting is used instead, which also yields a
-  real AUC. Otherwise AUC is left blank (hard votes have no meaningful ROC).
-
-Usage
------
-  # zero-shot, RICES retrieval, 3-expert committee (odd -> no ties)
-  python multi_expert_classifier.py --experts MMed Mistral MedGemma \
-      --n_demos 0 --retrieval rices
-
-  # sweep zero-shot AND few-shot in one call, 4-expert committee
-  python multi_expert_classifier.py --experts MMed Mistral MedGemma Qwen \
-      --sweep "0:rices" "4:rices" "4:random"
-"""
 
 import os
 import re
