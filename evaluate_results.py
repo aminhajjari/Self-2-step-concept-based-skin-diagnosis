@@ -118,6 +118,31 @@ def print_comparison_table(dataset, rows):
             print(f"  {label:<22}  {'MISSING':>8}  {'MISSING':>8}  {'MISSING':>8}  {'N/A':>10}")
     print(sep)
 
+
+
+def evaluate_concepts():
+    import glob
+    print("\n" + "="*78)
+    print("  CONCEPT-LEVEL EVALUATION — violation reduction per refiner")
+    print("="*78)
+    rows = []
+    for f in sorted(glob.glob("results/concept_prediction/*refinement_stats*.csv")):
+        d = pd.read_csv(f)
+        aff = d[d.initial_violations > 0]
+        name = f.split("/")[-1]
+        init, final = d.initial_violations.mean(), d.final_violations.mean()
+        reduced = int((d.final_violations < d.initial_violations).sum())
+        print(f"  {name}")
+        print(f"     init {init:.3f} -> final {final:.3f} | "
+              f"reduced on {reduced} | affected {len(aff)}/{len(d)}")
+        rows.append({"file": name, "init_viol": round(init,3),
+                     "final_viol": round(final,3), "reduced_imgs": reduced,
+                     "affected_imgs": len(aff), "total_imgs": len(d)})
+    os.makedirs("results/tables", exist_ok=True)
+    pd.DataFrame(rows).to_csv("results/tables/concept_violation_stats.csv", index=False)
+    print("\n  Saved: results/tables/concept_violation_stats.csv")
+
+
 # ── main ───────────────────────────────────────────────────────────────────────
 def main():
     print("\n" + "="*78)
@@ -133,8 +158,8 @@ def main():
                 m = compute_metrics(csv_path(cfg, dataset))
             rows.append((cfg["label"], m))
         print_comparison_table(dataset, rows)
-
+        
     print()
-
+evaluate_concepts()
 if __name__ == "__main__":
     main()
