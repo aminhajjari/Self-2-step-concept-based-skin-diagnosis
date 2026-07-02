@@ -18,7 +18,7 @@ ENS_DIR    = "results/multi_expert"
 TABLE_DIR  = "results/tables"
 
 # Every classifier / refiner the pipeline can emit. Extend here if you add more.
-KNOWN_CLASSIFIERS = ["MMed", "Mistral", "MedGemma", "Qwen", "GPT", "Gemini"]
+KNOWN_CLASSIFIERS = ["MMed", "Mistral", "MedGemma"]
 KNOWN_REFINERS    = ["rule", "mmed", "mistral", "none"]
 
 POS_LABEL = "melanoma"   # positive class for sensitivity
