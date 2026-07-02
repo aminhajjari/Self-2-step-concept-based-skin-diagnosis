@@ -1,13 +1,4 @@
-#!/usr/bin/env python3
-"""
-mcnemar_test.py
-Statistical significance testing using McNemar's test.
-Compares your best config against:
-  1. No-refinement baseline
-  2. Paper baseline (if you have those result files)
 
-Run after the full pipeline completes.
-"""
 import pandas as pd
 import numpy as np
 from pathlib import Path
