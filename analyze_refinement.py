@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-"""
-analyze_refinement.py
-Produces Table X and Figure X for the paper:
-- Violation reduction rates per refiner per dataset
-- Convergence rates
-- Fallback rates (from mmed/mistral_refiner logs)
-"""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
