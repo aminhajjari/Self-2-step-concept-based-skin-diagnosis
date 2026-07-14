@@ -395,6 +395,22 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
     gc.collect()
     torch.cuda.empty_cache()
 
+
+def build_pred_path(dataset, split, model_name, raw_values, ground_truth_concepts,
+                    concept_extractor, n_demos, refiner_name, random_demos, no_hint):
+    """Single source of truth for label_prediction CSV filenames."""
+    retrieval_tag = "random" if random_demos else "rices"
+    hint_tag = "_nohint" if no_hint else ""
+    split_tag = f"_split_{split}" if split is not None else ""
+    return (
+        f"results/label_prediction/{dataset}{split_tag}_{model_name}"
+        f"_diagnostic_report_validation_raw_values_{raw_values}"
+        f"_gt_concepts_{ground_truth_concepts}"
+        f"_model_extractor_{concept_extractor}"
+        f"_n_demos_{n_demos}_refiner_{refiner_name}"
+        f"_retrieval_{retrieval_tag}{hint_tag}.csv"
+    )
+
 def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
            n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False,
