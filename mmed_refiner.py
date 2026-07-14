@@ -62,7 +62,9 @@ class MMedBasedRefiner:
                 extracted = self._try_extract_concepts(refined_concepts, concepts_dict)
 
                 if extracted and self._validate_format(extracted):
-                    print(f"✓ Extraction successful")
+                    extracted, n_rev = self.validator.validate(extracted, concepts_dict)
+                    self.n_success += 1
+                    print(f"✓ Extraction successful ({n_rev} slots reverted)")
                     return extracted
                 else:
                     self.n_invalid += 1
