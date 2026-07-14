@@ -15,7 +15,19 @@ class MMedBasedRefiner:
     def __init__(self, ckpt="/home/gkianfar/scratch/Amin/concept/maincode/Self-2-step-concept-based-skin-diagnosis/checkpoint/MMed-Llama-3-8B-EnIns"):
         print(f"Loading MMed-LLM refiner: {ckpt}")
         self.model = MMedLlama3(ckpt=ckpt)
+        from src.self_refiner.concept_refiner import ConceptVocabularyValidator
+        self.validator = ConceptVocabularyValidator()
+        self.n_success = 0
+        self.n_echoed  = 0
+        self.n_invalid = 0
+        self.n_errors  = 0
         print("✓ MMed-LLM refiner loaded")
+
+    def report(self):
+        tot = self.n_success + self.n_echoed + self.n_invalid + self.n_errors
+        print(f"\n[MMed-refiner] calls={tot} success={self.n_success} "
+              f"echoed={self.n_echoed} invalid={self.n_invalid} errors={self.n_errors} "
+              f"| OOV slots reverted={self.validator.n_reverted_slots}")
 
     def __call__(self, concepts_str: str, feedback: str, concepts_dict: Dict[str, str]) -> str:
         violated_concepts = self._extract_violated_concepts(feedback)
