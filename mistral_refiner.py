@@ -47,22 +47,32 @@ class MistralBasedRefiner:
             prompt = self.model.get_prompt(
                 instruction=instruction, query=query, demos=None
             )
-            # 120 tokens is enough for one concept sentence (~90 tokens)
             raw = self.model.predict(prompt=prompt, max_new_tokens=120).strip()
             cleaned = self._clean_output(raw)
 
             if self._validate_format(cleaned):
                 cleaned, n_rev = self.validator.validate(cleaned, concepts_dict)
-                if extracted and self._validate_format(extracted):
+                self.n_success += 1
+                print(f"✓ Mistral refinement successful ({n_rev} slots reverted)")
+                return cleaned
+
+            print("⚠ Mistral format failed, attempting extraction...")
+            extracted = self._try_extract_concepts(cleaned, concepts_dict)
+            if extracted and self._validate_format(extracted):
                 extracted, n_rev = self.validator.validate(extracted, concepts_dict)
                 self.n_success += 1
                 print(f"✓ Extraction successful ({n_rev} slots reverted)")
                 return extracted
 
-            
-
             self.n_invalid += 1
             print("⚠ Mistral produced invalid output — keeping ORIGINAL concepts (no-op)")
+            return concepts_str
+
+        except Exception as e:
+            import traceback
+            self.n_errors += 1
+            print(f"⚠ Mistral error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
+            traceback.print_exc()
             return concepts_str
 
         except Exception as e:
