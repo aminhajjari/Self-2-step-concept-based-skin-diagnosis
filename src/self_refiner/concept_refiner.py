@@ -287,3 +287,48 @@ class ConceptSelfRefine:
         info['final_violations'] = n_viols
         
         return current, info
+# ── output-space validator: refiners may not leave ExpLICD's vocabulary ────────
+class ConceptVocabularyValidator:
+    """
+    Enforces that a refined concept string stays inside ExpLICD's closed
+    candidate-phrase space. Any slot whose value is not a verbatim member of
+    the candidate list for that slot is REVERTED to the original value.
+    """
+
+    def __init__(self):
+        from src.models.Explicd import explicid_isic_dict   # lazy: avoids circular import
+        self.vocab = {
+            k: {str(v).lower().strip() for v in vals}
+            for k, vals in explicid_isic_dict.items()
+        }
+        self.parser = ConceptSelfRefine(llm_refine_fn=None)
+        self.n_reverted_slots = 0
+        self.n_rejected_calls = 0
+
+    def validate(self, refined_str: str, original_dict: Dict[str, str]) -> Tuple[str, int]:
+        refined_dict = self.parser.parse_concepts(refined_str)
+        clean, reverted = {}, 0
+
+        for key, orig_val in original_dict.items():
+            new_val = refined_dict.get(key)
+            legal = self.vocab.get(key, set())
+            if new_val is not None and new_val.lower().strip() in legal:
+                clean[key] = new_val                       # in-vocabulary: accept
+            else:
+                clean[key] = orig_val                      # OOV or missing: revert
+                if new_val is not None and new_val.lower().strip() != str(orig_val).lower().strip():
+                    reverted += 1
+
+        self.n_reverted_slots += reverted
+        if reverted:
+            self.n_rejected_calls += 1
+
+        template = (
+            "The color is {color}, the shape is {shape}, the border is {border}, "
+            "the dermoscopic patterns are {dermoscopic patterns}, the texture is {texture}, "
+            "the symmetry is {symmetry}, the elevation is {elevation}."
+        )
+        try:
+            return template.format(**clean), reverted
+        except KeyError:
+            return refined_str, reverted
