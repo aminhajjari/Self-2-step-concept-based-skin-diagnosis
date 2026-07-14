@@ -697,7 +697,9 @@ if __name__ == "__main__":
     parser.add_argument('--classifier_ckpt', type=str, default=None, help='Checkpoint for classifier LLM (if different from refiner ckpt)')
     parser.add_argument('--concept_extractor', type=str, default='Explicd')
     parser.add_argument('--concept_reference_dict', type=str, default='PH2')
-    parser.add_argument('--llm', type=str, default='MMed')
+    parser.add_argument('--llm', type=str, default=None,
+                        choices=['MMed', 'Mistral', 'Qwen', 'MedGemma', 'GPT', 'Gemini'],
+                        help='Stage-3 classifier.')
     parser.add_argument('--use_demos', action="store_true")
     parser.add_argument('--predict_for_train_set', action="store_true")
     parser.add_argument('--n_demos', type=int, default=0)
@@ -706,7 +708,15 @@ if __name__ == "__main__":
     parser.add_argument('--gt_concepts', action="store_true")
     parser.add_argument('--generate_concepts', action="store_true")
     parser.add_argument('--data_path', type=str, default='data')
-    parser.add_argument('--refiner', type=str, default='mmed', choices=['mmed', 'mistral', 'rule', 'none'])
+    parser.add_argument('--refiner', type=str, default='mmed',
+                        choices=['rule', 'mistral', 'mmed', 'none'],
+                        help='Concept refiner arm. ONLY rule/mistral/mmed are valid — '
+                             'Qwen and MedGemma are classifier-only models.')
+    parser.add_argument('--refiner_list', nargs='+', default=None,
+                        choices=['rule', 'mistral', 'mmed', 'none'],
+                        help='Sweep several refiner arms in ONE process (model loaded once).')
+    parser.add_argument('--split_list', nargs='+', type=int, default=None,
+                        help='Sweep several PH2 splits in ONE process.')
     parser.add_argument('--random_demos', action="store_true", help='Use random demo selection instead of RICES')
     parser.add_argument('--margin_threshold', type=float, default=0.2)
     args = parser.parse_args()
