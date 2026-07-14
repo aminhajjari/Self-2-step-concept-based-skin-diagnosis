@@ -41,7 +41,7 @@ OUTPUT_BASE="/home/gkianfar/scratch/Amin/concept/outputs"
 MMED_CKPT="$PROJECT_PATH/checkpoint/MMed-Llama-3-8B-EnIns"
 MISTRAL_CKPT="$PROJECT_PATH/checkpoint/Mistral-7B-Instruct"
 QWEN_CKPT="$PROJECT_PATH/checkpoint/Qwen2.5-72B-Instruct"     
-MEDGEMMA_CKPT="$PROJECT_PATH/checkpoint/medgemma-4b-it"       
+MEDGEMMA_CKPT="$PROJECT_PATH/checkpoint/MedGemma-4b-it"       
 
 declare -A CKPT=(
   [MMed]="$MMED_CKPT"
