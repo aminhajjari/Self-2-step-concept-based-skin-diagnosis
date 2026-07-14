@@ -59,11 +59,7 @@ class MistralBasedRefiner:
                 print(f"✓ Extraction successful ({n_rev} slots reverted)")
                 return extracted
 
-            print("⚠ Mistral format failed, attempting extraction...")
-            extracted = self._try_extract_concepts(cleaned, concepts_dict)
-            if extracted and self._validate_format(extracted):
-                print("✓ Extraction successful")
-                return extracted
+            
 
             self.n_invalid += 1
             print("⚠ Mistral produced invalid output — keeping ORIGINAL concepts (no-op)")
