@@ -791,6 +791,7 @@ if __name__ == "__main__":
                     n_demos=args.n_demos,
                     refiner_name=_ref,
                     random_demos=args.random_demos,
+                    no_hint=args.no_hint,
                 )
 
     print("\n" + "#"*80)
