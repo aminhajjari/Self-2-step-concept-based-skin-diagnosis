@@ -755,33 +755,46 @@ if __name__ == "__main__":
 
     # ====================== STEP 2 + 3: Classify and Evaluate ======================
     else:
-        c_to_y(
-            model_name=args.llm,
-            dataset=args.dataset,
-            ckpt=classifier_ckpt,
-            split=args.split,
-            raw_values=args.raw_values,
-            concept_extractor=args.concept_extractor,
-            report_path=args.report_path,
-            use_demos=args.use_demos,
-            n_demos=args.n_demos,
-            ground_truth_concepts=args.gt_concepts,
-            refiner_name=args.refiner,
-            random_demos=args.random_demos
-        )
+        refiners = args.refiner_list or [args.refiner]
+        splits   = args.split_list   or [args.split]
 
-        classification(
-            model_name=args.llm,
-            dataset=args.dataset,
-            ckpt=classifier_ckpt,
-            split=args.split,
-            ground_truth_concepts=args.gt_concepts,
-            raw_values=args.raw_values,
-            concept_extractor=args.concept_extractor,
-            n_demos=args.n_demos,
-            refiner_name=args.refiner,
-            random_demos=args.random_demos
-        )
+        # Build the classifier ONCE, reuse across the whole sweep.
+        clf_model = build_classifier(args.llm, classifier_ckpt)
+
+        for _ref in refiners:
+            for _sp in splits:
+                print(f"\n=== classifier={args.llm} refiner={_ref} split={_sp} "
+                      f"n_demos={args.n_demos} ===")
+
+                c_to_y(
+                    model_name=args.llm,
+                    dataset=args.dataset,
+                    ckpt=classifier_ckpt,
+                    split=_sp,
+                    raw_values=args.raw_values,
+                    concept_extractor=args.concept_extractor,
+                    report_path=args.report_path,
+                    use_demos=args.use_demos,
+                    n_demos=args.n_demos,
+                    ground_truth_concepts=args.gt_concepts,
+                    refiner_name=_ref,
+                    random_demos=args.random_demos,
+                    no_hint=args.no_hint,
+                    model=clf_model,
+                )
+
+                classification(
+                    model_name=args.llm,
+                    dataset=args.dataset,
+                    ckpt=classifier_ckpt,
+                    split=_sp,
+                    ground_truth_concepts=args.gt_concepts,
+                    raw_values=args.raw_values,
+                    concept_extractor=args.concept_extractor,
+                    n_demos=args.n_demos,
+                    refiner_name=_ref,
+                    random_demos=args.random_demos,
+                )
 
     print("\n" + "#"*80)
     print(f"# Status: Finished Successfully!")
