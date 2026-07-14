@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:h100:1
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=256G
+#SBATCH --mem=350G
 #SBATCH --output=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.out
 #SBATCH --error=/home/gkianfar/scratch/Amin/concept/outputs/logs/xcy_%j.err
 
