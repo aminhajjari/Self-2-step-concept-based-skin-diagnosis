@@ -18,8 +18,8 @@ echo "  Started: $(date)"
 echo "========================================="
 
 module purge
-module load gcc python/3.10 cuda/12.6 opencv/4.10.0
-source /home/gkianfar/scratch/Amin/conceptvenv/bin/activate
+module load gcc python/3.11.5 opencv/4.13.0 arrow
+source /home/gkianfar/scratch/Amin/conceptvenv311/bin/activate
 
 export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
