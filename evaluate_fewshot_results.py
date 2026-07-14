@@ -10,6 +10,7 @@ import numpy as np
 from pathlib import Path
 from sklearn.metrics import balanced_accuracy_score, recall_score
 
+REPORTED_CLASSIFIERS = ["MMed", "Mistral", "Qwen"]   # MedGemma: ensemble member only
 RESULTS_DIR = Path("results/label_prediction")
 N_SPLITS    = 5
 
