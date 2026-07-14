@@ -41,17 +41,22 @@ class MMedBasedRefiner:
 
             if self._validate_format(refined_concepts):
                 from src.self_refiner.concept_refiner import (
-                    ConceptConsistencyRules, ConceptSelfRefine, SimpleRuleBasedRefiner)
+                    ConceptConsistencyRules, ConceptSelfRefine)
                 _parser = ConceptSelfRefine(llm_refine_fn=None)
                 _rules  = ConceptConsistencyRules()
+
+                refined_concepts, n_rev = self.validator.validate(refined_concepts, concepts_dict)
+
                 before = len(_rules.check_consistency(concepts_dict))
                 after  = len(_rules.check_consistency(_parser.parse_concepts(refined_concepts)))
                 if after < before:
-                    print(f"✓ LLM refinement successful ({before}->{after} violations)")
+                    self.n_success += 1
+                    print(f"✓ MMed refinement successful ({before}->{after} violations, {n_rev} slots reverted)")
                     return refined_concepts
                 else:
-                    print(f"⚠ LLM echoed input ({before}->{after}), using rule-based fix")
-                    return SimpleRuleBasedRefiner()(concepts_str, feedback, concepts_dict)
+                    self.n_echoed += 1
+                    print(f"⚠ MMed failed to reduce violations ({before}->{after}) — NO-OP (arm independence)")
+                    return concepts_str
             else:
                 print(f"⚠ Format validation failed, attempting extraction...")
                 extracted = self._try_extract_concepts(refined_concepts, concepts_dict)
@@ -60,13 +65,13 @@ class MMedBasedRefiner:
                     print(f"✓ Extraction successful")
                     return extracted
                 else:
+                    self.n_invalid += 1
                     print("⚠ LLM produced invalid output — keeping ORIGINAL concepts (no-op)")
                     return concepts_str
         except Exception as e:
             import traceback
+            self.n_errors += 1
             print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
-            traceback.print_exc()
-            return concepts_str
 
     def _extract_violated_concepts(self, feedback: str) -> set:
         violated = set()
