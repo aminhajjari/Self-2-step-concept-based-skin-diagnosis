@@ -53,9 +53,11 @@ class MistralBasedRefiner:
 
             if self._validate_format(cleaned):
                 cleaned, n_rev = self.validator.validate(cleaned, concepts_dict)
+                if extracted and self._validate_format(extracted):
+                extracted, n_rev = self.validator.validate(extracted, concepts_dict)
                 self.n_success += 1
-                print(f"✓ Mistral refinement successful ({n_rev} slots reverted)")
-                return cleaned
+                print(f"✓ Extraction successful ({n_rev} slots reverted)")
+                return extracted
 
             print("⚠ Mistral format failed, attempting extraction...")
             extracted = self._try_extract_concepts(cleaned, concepts_dict)
