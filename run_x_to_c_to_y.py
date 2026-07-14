@@ -397,7 +397,7 @@ def x_to_c(model_name: str, dataset:str, ckpt:str=None, split=None, raw_values=F
 
 def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
-           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
+           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False, no_hint=False):
     """
     Report template:
     > The lesion is diagnosed as {label}. The presence of {", ".join(item for item in concepts)} are highly suggestive of {label}.
@@ -646,7 +646,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     print(f"Results saved to {file_path}")
 
 
-def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
+def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False, no_hint=False):
 
     retrieval_tag = "random" if random_demos else "rices"
     if model_name == "MMed":
@@ -701,6 +701,8 @@ if __name__ == "__main__":
     parser.add_argument('--use_demos', action="store_true")
     parser.add_argument('--predict_for_train_set', action="store_true")
     parser.add_argument('--n_demos', type=int, default=0)
+    parser.add_argument('--no_hint', action='store_true',
+                        help='Disable the injected nevus/melanoma decision rule at 0-shot.')
     parser.add_argument('--gt_concepts', action="store_true")
     parser.add_argument('--generate_concepts', action="store_true")
     parser.add_argument('--data_path', type=str, default='data')
