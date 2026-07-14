@@ -71,9 +71,10 @@ echo ""
 run_stage() {
     echo ">>> $(date '+%H:%M:%S') python run_x_to_c_to_y.py $@"
     # AFTER  — keep stderr (errors), only hide stdout (tqdm/debug noise)
-    python run_x_to_c_to_y.py "$@" \
-        1>/dev/null               # hide verbose stdout, keep real errors in .err
-    EXIT_CODE=$?
+    if ! python run_x_to_c_to_y.py "$@" 1>/dev/null; then
+        echo "ERROR: stage failed — args: $@" >&2
+        exit 1
+    fi
     if [ $EXIT_CODE -ne 0 ]; then
         echo "ERROR: stage failed with exit code $EXIT_CODE — args: $@" >&2
         exit $EXIT_CODE
