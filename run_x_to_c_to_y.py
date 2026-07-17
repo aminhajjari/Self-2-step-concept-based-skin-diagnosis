@@ -501,7 +501,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     # Inject the decision criteria when there are no demos to anchor the model.
     # MMed survives 0-shot (medical model); general Mistral does not, and
     # collapses to "predict melanoma for everything" (Sens 100 / Spec 0).
-    if (not use_demos or n_demos == 0) and not no_hint:
+    if not use_demos or n_demos == 0:
         instruction = instruction + "\n" + hint
     # Demonstrations
     if use_demos:
