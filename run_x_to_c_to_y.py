@@ -654,21 +654,7 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
     print(f"Results saved to {file_path}")
 
 
-def build_classifier(model_name: str, ckpt: str):
-    """Single place where a Stage-3 classifier is instantiated."""
-    if model_name == "MMed":
-        return MMedLlama3(ckpt)
-    elif model_name == "Mistral":
-        return Mistral()
-    elif model_name == "MedGemma":
-        return MedGemma(ckpt=ckpt)
-    elif model_name == "Qwen":
-        return Qwen(ckpt=ckpt)
-    elif model_name == "GPT":
-        return GPT5(model=ckpt)
-    elif model_name == "Gemini":
-        return Gemini(model=ckpt)
-    raise TypeError(f"The specified model {model_name} does not have a valid implementation.")
+
 
 def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
 
