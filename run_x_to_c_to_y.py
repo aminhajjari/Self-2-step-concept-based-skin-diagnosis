@@ -699,7 +699,7 @@ if __name__ == "__main__":
     parser.add_argument('--concept_extractor', type=str, default='Explicd')
     parser.add_argument('--concept_reference_dict', type=str, default='PH2')
     parser.add_argument('--llm', type=str, default=None,
-                        choices=['MMed', 'Mistral', 'Qwen', 'MedGemma', 'GPT', 'Gemini'],
+                        choices=['MMed', 'Mistral', 'Qwen', 'MedGemma'],
                         help='Stage-3 classifier.')
     parser.add_argument('--use_demos', action="store_true")
     parser.add_argument('--predict_for_train_set', action="store_true")
