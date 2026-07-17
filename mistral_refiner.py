@@ -22,18 +22,7 @@ class MistralBasedRefiner:
     def __init__(self, ckpt: str = MISTRAL_LOCAL_CKPT):
         print(f"Loading Mistral refiner from: {ckpt}")
         self.model = Mistral(ckpt=ckpt)
-        from src.self_refiner.concept_refiner import ConceptVocabularyValidator
-        self.validator = ConceptVocabularyValidator()
-        self.n_success = 0
-        self.n_invalid = 0
-        self.n_errors  = 0
         print("✓ Mistral refiner loaded")
-
-    def report(self):
-        tot = self.n_success + self.n_invalid + self.n_errors
-        print(f"\n[Mistral-refiner] calls={tot} success={self.n_success} "
-              f"invalid={self.n_invalid} errors={self.n_errors} "
-              f"| OOV slots reverted={self.validator.n_reverted_slots}")
 
     # ── public call ─────────────────────────────────────────────────────────────
     def __call__(self, concepts_str: str, feedback: str,
