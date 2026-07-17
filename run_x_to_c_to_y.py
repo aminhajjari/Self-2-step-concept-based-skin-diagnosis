@@ -480,8 +480,21 @@ def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False,
 
     
     # Evaluate — reuse a pre-built model if the caller supplied one (sweep mode)
-    if model is None:
-        model = build_classifier(model_name, ckpt)
+    # Evaluate
+    if model_name == "MMed":
+        model = MMedLlama3(ckpt)
+    elif model_name == "Mistral":
+        model = Mistral()
+    elif model_name == "MedGemma":
+        model = MedGemma(ckpt=ckpt)
+    elif model_name == "Qwen":
+        model = Qwen(ckpt=ckpt)
+    elif model_name == "GPT":
+        model = GPT5(model=ckpt)
+    elif model_name == "Gemini":
+        model = Gemini(model=ckpt)         
+    else:
+        raise TypeError(f"The specififed model {model_name} does not have a valid implementation.")
 
     dict_responses = {
         'image_id': [],
