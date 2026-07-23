@@ -269,7 +269,12 @@ class ConceptSelfRefine:
             
             try:
                 refined = self.llm_refine_fn(current, feedback, concepts_dict)
-                
+
+                if refined is None:
+                    if self.verbose:
+                        print(f"⚠ Refiner returned None, stopping")
+                    break
+
                 if refined == current:
                     if self.verbose:
                         print(f"⚠ No change from refiner, stopping")
