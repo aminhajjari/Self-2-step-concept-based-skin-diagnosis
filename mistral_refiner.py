@@ -46,9 +46,7 @@ class MistralBasedRefiner:
             print("⚠ Mistral format failed, attempting extraction...")
             extracted = self._try_extract_concepts(cleaned, concepts_dict)
             if extracted and self._validate_format(extracted):
-                extracted, n_rev = self.validator.validate(extracted, concepts_dict)
-                self.n_success += 1
-                print(f"✓ Extraction successful ({n_rev} slots reverted)")
+                print("✓ Extraction successful")
                 return extracted
 
             print("⚠ Mistral produced invalid output — keeping ORIGINAL concepts (no-op)")
@@ -59,11 +57,6 @@ class MistralBasedRefiner:
             print(f"⚠ Mistral error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
             traceback.print_exc()
             return concepts_str
-
-        except Exception as e:
-            import traceback
-            self.n_errors += 1
-            print(f"⚠ Mistral error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
 
     # ── prompt builders ──────────────────────────────────────────────────────────
     def _build_instruction(self) -> str:
