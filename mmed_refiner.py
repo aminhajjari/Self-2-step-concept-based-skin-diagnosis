@@ -45,7 +45,9 @@ class MMedBasedRefiner:
                 extracted = self._try_extract_concepts(refined_concepts, concepts_dict)
 
                 if extracted and self._validate_format(extracted):
-                    extracted, n_rev = self.validator.validate(extracted, concepts_dict)
+                    print("⚠ LLM produced invalid output — using extracted concepts")
+                    return extracted
+                else:
                     print("⚠ LLM produced invalid output — keeping ORIGINAL concepts (no-op)")
                     return concepts_str
                 else:
@@ -55,6 +57,7 @@ class MMedBasedRefiner:
         except Exception as e:
             import traceback
             print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
+            return concepts_str
 
     def _extract_violated_concepts(self, feedback: str) -> set:
         violated = set()
