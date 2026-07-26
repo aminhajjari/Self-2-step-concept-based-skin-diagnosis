@@ -50,12 +50,6 @@ class MMedBasedRefiner:
                 else:
                     print("⚠ LLM produced invalid output — keeping ORIGINAL concepts (no-op)")
                     return concepts_str
-                if extracted and self._validate_format(extracted):
-                    print("⚠ LLM produced invalid output — using extracted concepts")
-                    return extracted
-                else:
-                    print("⚠ LLM produced invalid output — keeping ORIGINAL concepts (no-op)")
-                    return concepts_str
         except Exception as e:
             import traceback
             print(f"⚠ LLM refinement error [{type(e).__name__}]: {repr(e)} — keeping ORIGINAL concepts (no-op)")
