@@ -413,7 +413,8 @@ def build_pred_path(dataset, split, model_name, raw_values, ground_truth_concept
 
 def c_to_y(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, 
            concept_extractor:str=None, report_path: str = None, use_demos=False, 
-           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
+           n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', 
+           random_demos=False, no_hint=False, model=None):
     """
     Report template:
     > The lesion is diagnosed as {label}. The presence of {", ".join(item for item in concepts)} are highly suggestive of {label}.
@@ -657,7 +658,7 @@ def build_classifier(model_name: str, ckpt: str):
         return Gemini(model=ckpt)
     raise TypeError(f"The specified model {model_name} does not have a valid implementation.")
 
-def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False):
+def classification(model_name: str, dataset:str, ckpt:str, split=None, raw_values=False, concept_extractor:str=None, report_path: str = None, use_demos=False, n_demos=0, ground_truth_concepts=False, refiner_name:str='mmed', random_demos=False, no_hint=False):
 
     file_path = build_pred_path(dataset, split, model_name, raw_values,
                                 ground_truth_concepts, concept_extractor,
