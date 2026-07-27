@@ -718,6 +718,7 @@ if __name__ == "__main__":
                         help='Sweep several PH2 splits in ONE process.')
     parser.add_argument('--random_demos', action="store_true", help='Use random demo selection instead of RICES')
     parser.add_argument('--margin_threshold', type=float, default=0.2)
+    parser.add_argument('--no_hint', action="store_true", help='Disable hint in prompt (affects output filename tag)')
     args = parser.parse_args()
     seed_everything(seed=42)
 
