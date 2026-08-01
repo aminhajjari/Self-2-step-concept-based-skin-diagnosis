@@ -203,7 +203,7 @@ done
 echo ""
 echo "══════════  STEP 2d: Multi-Expert Ensemble  ══════════"
 python multi_expert_classifier.py \
-    --experts MMed Mistral MedGemma \
+    --experts MMed Mistral MedGemma Qwen \
     --sweep 0:rices 1:rices 2:rices 4:rices 8:rices 1:random 2:random \
     --tie melanoma \
     --prob_col p_melanoma
