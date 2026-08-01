@@ -253,7 +253,7 @@ def parse_sweep(items):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--experts", nargs="+", default=["MMed", "Mistral", "MedGemma"],
+    ap.add_argument("--experts", nargs="+", default=["MMed", "Mistral", "MedGemma", "Qwen"],
                     help="Committee members (order irrelevant). Odd sizes avoid ties.")
     ap.add_argument("--n_demos", default="0")
     ap.add_argument("--retrieval", default="rices", choices=["rices", "random"])
